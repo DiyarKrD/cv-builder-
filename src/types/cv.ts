@@ -36,6 +36,20 @@ export interface CustomSection {
   order: number;
 }
 
+export type LanguageLevel = 'native' | 'fluent' | 'advanced' | 'intermediate' | 'beginner';
+
+export interface Language {
+  id: string;
+  name: string;
+  level: LanguageLevel;
+  flag: string;
+}
+
+export interface CVPage {
+  id: string;
+  sections: string[];
+}
+
 export interface PhotoStyle {
   shape: 'square' | 'rounded' | 'circle' | 'hexagon';
   size: 'sm' | 'md' | 'lg' | 'xl';
@@ -48,7 +62,9 @@ export interface CVData {
   education: Education[];
   experience: Experience[];
   skills: string[];
+  languages: Language[];
   sections: CustomSection[];
+  pages: CVPage[];
   professionalSummary: string;
 }
 
@@ -117,7 +133,13 @@ export const DEFAULT_CV_DATA: CVData = {
     'Power Systems',
     'Renewable Energy',
   ],
+  languages: [
+    { id: 'lang-1', name: 'Kurdish', level: 'native', flag: '☀️' },
+    { id: 'lang-2', name: 'English', level: 'fluent', flag: '🇬🇧' },
+    { id: 'lang-3', name: 'Arabic', level: 'fluent', flag: '🇸🇦' },
+  ],
   sections: [],
+  pages: [],
   professionalSummary:
     'Dedicated Electrical Engineer with 4+ years of experience in power systems design and renewable energy solutions. Proven track record in optimizing electrical systems and leading successful project teams.',
 };
@@ -189,4 +211,48 @@ export const SECTION_TYPES = [
   { value: 'projects', label: 'Projects', icon: 'FolderOpen' },
   { value: 'references', label: 'References', icon: 'Users' },
   { value: 'hobbies', label: 'Hobbies & Interests', icon: 'Heart' },
+];
+
+export const LANGUAGE_LEVELS: { value: LanguageLevel; label: string; dots: number }[] = [
+  { value: 'native', label: 'Native', dots: 5 },
+  { value: 'fluent', label: 'Fluent', dots: 4 },
+  { value: 'advanced', label: 'Advanced', dots: 3 },
+  { value: 'intermediate', label: 'Intermediate', dots: 2 },
+  { value: 'beginner', label: 'Beginner', dots: 1 },
+];
+
+export const SUGGESTED_LANGUAGES: { name: string; flag: string }[] = [
+  { name: 'English', flag: '🇬🇧' },
+  { name: 'Kurdish', flag: '☀️' },
+  { name: 'Arabic', flag: '🇸🇦' },
+  { name: 'Turkish', flag: '🇹🇷' },
+  { name: 'Persian', flag: '🇮🇷' },
+  { name: 'German', flag: '🇩🇪' },
+  { name: 'French', flag: '🇫🇷' },
+  { name: 'Spanish', flag: '🇪🇸' },
+  { name: 'Italian', flag: '🇮🇹' },
+  { name: 'Portuguese', flag: '🇵🇹' },
+  { name: 'Dutch', flag: '🇳🇱' },
+  { name: 'Swedish', flag: '🇸🇪' },
+  { name: 'Norwegian', flag: '🇳🇴' },
+  { name: 'Danish', flag: '🇩🇰' },
+  { name: 'Finnish', flag: '🇫🇮' },
+  { name: 'Polish', flag: '🇵🇱' },
+  { name: 'Russian', flag: '🇷🇺' },
+  { name: 'Ukrainian', flag: '🇺🇦' },
+  { name: 'Greek', flag: '🇬🇷' },
+  { name: 'Czech', flag: '🇨🇿' },
+  { name: 'Hungarian', flag: '🇭🇺' },
+  { name: 'Romanian', flag: '🇷🇴' },
+  { name: 'Chinese', flag: '🇨🇳' },
+  { name: 'Japanese', flag: '🇯🇵' },
+  { name: 'Korean', flag: '🇰🇷' },
+  { name: 'Hindi', flag: '🇮🇳' },
+  { name: 'Urdu', flag: '🇵🇰' },
+  { name: 'Bengali', flag: '🇧🇩' },
+  { name: 'Thai', flag: '🇹🇭' },
+  { name: 'Vietnamese', flag: '🇻🇳' },
+  { name: 'Indonesian', flag: '🇮🇩' },
+  { name: 'Malay', flag: '🇲🇾' },
+  { name: 'Swahili', flag: '🇰🇪' },
 ];
