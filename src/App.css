@@ -1,0 +1,268 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Poppins:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/* Font Classes */
+.font-inter { font-family: 'Inter', sans-serif; }
+.font-playfair { font-family: 'Playfair Display', serif; }
+.font-mono { font-family: 'Roboto Mono', monospace; }
+.font-poppins { font-family: 'Poppins', sans-serif; }
+.font-oswald { font-family: 'Oswald', sans-serif; }
+.font-raleway { font-family: 'Raleway', sans-serif; }
+.font-bebas { font-family: 'Bebas Neue', cursive; }
+.font-space { font-family: 'Space Grotesk', sans-serif; }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* CV Page */
+.cv-page {
+  width: 210mm;
+  min-height: 297mm;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.cv-page-content {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Page break indicator (editor only) */
+.page-break-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 0;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+}
+.page-break-line {
+  flex: 1;
+  height: 1px;
+  border-top: 2px dashed #cbd5e1;
+  max-width: 200px;
+}
+
+/* Template 1: Modern Minimalist */
+.template-modern-minimalist { background: white; }
+
+/* Template 2: Classic Professional */
+.template-classic-pro { background: white; }
+.template-classic-pro .cv-header { border-top: 8px solid var(--primary-color, #1e40af); }
+
+/* Template 3: Creative Sidebar */
+.template-creative-sidebar { display: grid; grid-template-columns: 280px 1fr; min-height: 100%; }
+.template-creative-sidebar .cv-sidebar { background: var(--primary-color, #3b82f6); color: white; padding: 32px; }
+.template-creative-sidebar .cv-sidebar * { color: white !important; }
+.template-creative-sidebar .cv-main { padding: 32px; }
+
+/* Template 4: Two Column Technical */
+.template-two-column-tech .cv-body { column-count: 2; column-gap: 32px; }
+
+/* Template 5: Executive Header */
+.template-executive { background: linear-gradient(to bottom, var(--primary-color, #1e293b) 180px, white 180px); }
+.template-executive .cv-header { color: white; }
+.template-executive .cv-header * { color: white !important; }
+
+/* Template 6: Timeline Vertical */
+.template-timeline .cv-body { position: relative; padding-left: 140px; }
+.template-timeline .cv-body::before { content: ''; position: absolute; left: 100px; top: 0; bottom: 0; width: 2px; background: var(--primary-color, #e5e7eb); }
+.template-timeline .section-title { position: relative; }
+.template-timeline .section-title::before { content: ''; position: absolute; left: -44px; top: 50%; transform: translateY(-50%); width: 12px; height: 12px; background: var(--primary-color, #3b82f6); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px var(--primary-color, #3b82f6); }
+
+/* Template 7: Card Based */
+.template-cards .section-card { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+
+/* Template 8: Dark Mode Professional */
+.template-dark-pro { background: #0f172a; color: #f8fafc; }
+.template-dark-pro .text-gray-600,
+.template-dark-pro .text-gray-700,
+.template-dark-pro .text-gray-800,
+.template-dark-pro .text-gray-900 { color: #cbd5e1 !important; }
+.template-dark-pro .section-title { color: #f8fafc !important; }
+.template-dark-pro .border-b { border-color: #334155 !important; }
+
+/* Template 9: Colorful Vibrant */
+.template-colorful { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 32px; }
+.template-colorful .cv-content { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+
+/* Template 10: Grid Layout */
+.template-grid .cv-body { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.template-grid .grid-header { grid-column: 1 / -1; }
+.template-grid .grid-summary { grid-column: 1 / -1; }
+.template-grid .grid-education { grid-column: 1 / 6; }
+.template-grid .grid-experience { grid-column: 6 / -1; }
+.template-grid .grid-skills { grid-column: 1 / -1; }
+.template-grid .grid-sections { grid-column: 1 / -1; }
+
+/* Template 11: Centered Focus */
+.template-centered { text-align: center; }
+.template-centered .cv-header { text-align: center; }
+.template-centered .flex { justify-content: center; }
+
+/* Template 12: Left Heavy */
+.template-left-heavy { padding-left: 48px; border-left: 4px solid var(--primary-color, #3b82f6); }
+
+/* Template 13: Right Heavy */
+.template-right-heavy { padding-right: 48px; border-right: 4px solid var(--primary-color, #3b82f6); text-align: right; }
+.template-right-heavy .cv-header,
+.template-right-heavy .flex { flex-direction: row-reverse; text-align: right; }
+.template-right-heavy .justify-start { justify-content: flex-end; }
+
+/* Template 14: Compact Single Page */
+.template-compact { font-size: 0.85rem; line-height: 1.4; }
+.template-compact .section-title { font-size: 1rem; margin-bottom: 8px; }
+.template-compact p { margin-bottom: 4px; }
+
+/* Template 15: Magazine Style */
+.template-magazine { background: #fafafa; }
+.template-magazine .headline { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; line-height: 1; }
+.template-magazine .cv-header { border-bottom: 4px solid var(--primary-color, #111827); padding-bottom: 20px; margin-bottom: 20px; }
+
+/* Template 16: Infographic Heavy */
+.template-infographic .skill-bar { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; margin-top: 4px; }
+.template-infographic .skill-fill { height: 100%; background: var(--primary-color, #3b82f6); border-radius: 4px; }
+.template-infographic .skill-item { margin-bottom: 8px; }
+
+/* Template 17: Minimal Text */
+.template-minimal-text { padding: 60px; }
+.template-minimal-text .cv-name { font-weight: 300; letter-spacing: 0.1em; }
+.template-minimal-text .section-title { font-weight: 400; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.75rem; }
+
+/* Template 18: Bold Typography */
+.template-bold-type { font-weight: 700; }
+.template-bold-type .cv-name { font-size: 3rem; line-height: 0.9; text-transform: uppercase; letter-spacing: -2px; }
+.template-bold-type .cv-profession { text-transform: uppercase; letter-spacing: 0.1em; font-size: 1rem; }
+.template-bold-type .section-title { text-transform: uppercase; letter-spacing: 0.05em; font-weight: 900; }
+
+/* Template 19: Photo Focus */
+.template-photo-focus .photo-container { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; margin: 0 auto 24px; border: 5px solid var(--primary-color, #3b82f6); }
+.template-photo-focus .cv-header { text-align: center; }
+.template-photo-focus .flex { justify-content: center; }
+
+/* Template 20: Contact Bottom */
+.template-contact-bottom { display: flex; flex-direction: column; }
+.template-contact-bottom .contact-section { order: 999; margin-top: 32px; padding-top: 32px; border-top: 2px solid #e5e7eb; }
+
+/* Template 21: Striped Sections */
+.template-striped section:nth-child(odd) { background: #f8fafc; padding: 16px 40px; margin: 0 -40px; }
+
+/* Template 22: Elegant Serif */
+.template-elegant { font-family: 'Playfair Display', serif; }
+.template-elegant .cv-name,
+.template-elegant .section-title { font-weight: 400; letter-spacing: -0.5px; }
+
+/* Photo Styles */
+.photo-square { border-radius: 0; }
+.photo-rounded { border-radius: 12px; }
+.photo-circle { border-radius: 50%; }
+.photo-hexagon { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+
+.photo-sm { width: 80px; height: 80px; }
+.photo-md { width: 120px; height: 120px; }
+.photo-lg { width: 160px; height: 160px; }
+.photo-xl { width: 200px; height: 200px; }
+
+.photo-border-none { border: none; }
+.photo-border-thin { border: 2px solid #e5e7eb; }
+.photo-border-thick { border: 4px solid var(--primary-color, #3b82f6); }
+.photo-border-colored { border: 4px solid var(--primary-color, #3b82f6); }
+.photo-border-shadow { box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+
+/* Print Styles - NO WATERMARK */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white !important; margin: 0 !important; }
+  .cv-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    page-break-after: always;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+  }
+  .cv-page:last-child { page-break-after: auto; }
+  .page-break-indicator { display: none !important; }
+  .cv-wrapper { padding: 0 !important; gap: 0 !important; }
+  .cv-page { margin-bottom: 0 !important; }
+}
+
+/* Color Picker */
+input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+/* Range Slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  outline: none;
+  width: 100%;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+}
+
+/* Template Card */
+.template-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.template-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+.template-card.active {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Drag handle */
+.drag-handle {
+  cursor: grab;
+  color: #94a3b8;
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Skill tag */
+.skill-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
