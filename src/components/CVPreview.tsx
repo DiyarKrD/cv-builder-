@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState } from 'react';
 import { useCV } from '@/hooks/useCV';
 import { Mail, Phone, MapPin, Globe, Calendar, User } from 'lucide-react';
+import { LANGUAGE_LEVELS } from '@/types/cv';
 import type { CVData, CVSettings } from '@/types/cv';
 
 const A4_WIDTH_PX = 794;  // 210mm at 96 DPI
@@ -23,9 +24,30 @@ export function CVPreview() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
-  // Split content across pages based on template
+  // Build pages: manual layout (if custom pages exist) or automatic split
   useEffect(() => {
-    const splitIntoPages = () => {
+    const buildPages = () => {
+      // ---------- MANUAL MODE: user-defined pages ----------
+      const manualPages = cvData.pages ?? [];
+      if (manualPages.length > 0) {
+        const result: CVData[] = manualPages.map(page => {
+          const pageData = createEmptyCVData();
+          // Header info travels with every page, but only renders on the first
+          pageData.personal = cvData.personal;
+          pageData.contact = cvData.contact;
+          if (page.sections.includes('summary')) pageData.professionalSummary = cvData.professionalSummary;
+          if (page.sections.includes('education')) pageData.education = cvData.education;
+          if (page.sections.includes('experience')) pageData.experience = cvData.experience;
+          if (page.sections.includes('skills')) pageData.skills = cvData.skills;
+          if (page.sections.includes('languages')) pageData.languages = cvData.languages;
+          pageData.sections = (cvData.sections ?? []).filter(s => page.sections.includes(s.id));
+          return pageData;
+        });
+        setPages(result);
+        return;
+      }
+
+      // ---------- AUTOMATIC MODE: split content across pages ----------
       const maxContentHeight = A4_HEIGHT_PX - settings.pagePadding * 2;
 
       const result: CVData[] = [];
@@ -89,6 +111,18 @@ export function CVPreview() {
         currentHeight += skillsHeight + settings.sectionSpacing;
       }
 
+      // Languages
+      if ((cvData.languages ?? []).length > 0) {
+        const langHeight = cvData.languages.length * 28 + 34;
+        if (currentHeight + langHeight > maxContentHeight) {
+          result.push(currentPageData);
+          currentPageData = createEmptyCVData();
+          currentHeight = 0;
+        }
+        currentPageData.languages = cvData.languages;
+        currentHeight += langHeight + settings.sectionSpacing;
+      }
+
       // Custom sections
       for (const section of cvData.sections.filter(s => s.visible)) {
         const sectionHeight = estimateTextHeight(section.content, 13, 1.5, 50) + 40;
@@ -105,7 +139,7 @@ export function CVPreview() {
       setPages(result);
     };
 
-    splitIntoPages();
+    buildPages();
   }, [cvData, settings]);
 
   const fontClass = useMemo(() => {
@@ -461,6 +495,46 @@ function CVPageContent({
     );
   };
 
+  const renderLanguages = () => {
+    const langs = cvData.languages ?? [];
+    if (langs.length === 0) return null;
+    return (
+      <section className={`mb-5 languages-section ${isCards ? 'section-card' : ''}`}>
+        {renderSectionTitle('Languages')}
+        <div className="space-y-2">
+          {langs.map(lang => {
+            const lvl = LANGUAGE_LEVELS.find(l => l.value === lang.level);
+            const filled = lvl?.dots ?? 0;
+            return (
+              <div key={lang.id} className="flex items-center gap-2 text-sm">
+                {lang.flag && <span className="text-base leading-none w-6 text-center shrink-0">{lang.flag}</span>}
+                <span className={isDark ? 'text-gray-200' : 'text-gray-800'}>{lang.name}</span>
+                <span className="ml-auto flex items-center gap-2 shrink-0">
+                  <span className="flex items-center gap-1">
+                    {LANGUAGE_LEVELS.map((l, i) => (
+                      <span
+                        key={l.value}
+                        className="lang-dot"
+                        style={{
+                          background: i < filled
+                            ? settings.primaryColor
+                            : (isDark ? '#334155' : '#e5e7eb'),
+                        }}
+                      />
+                    ))}
+                  </span>
+                  <span className={`text-xs w-20 text-right ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {lvl?.label ?? lang.level}
+                  </span>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    );
+  };
+
   const renderCustomSections = () => {
     const sections = cvData.sections.filter(s => s.visible);
     if (sections.length === 0) return null;
@@ -507,6 +581,7 @@ function CVPageContent({
             {renderProfessionalSummary()}
             {renderEducation()}
             {renderExperience()}
+            {renderLanguages()}
             {renderCustomSections()}
           </div>
         </div>
@@ -525,6 +600,7 @@ function CVPageContent({
           {renderEducation()}
           {renderExperience()}
           {renderSkills()}
+          {renderLanguages()}
           {renderCustomSections()}
         </div>
       </div>
@@ -551,6 +627,7 @@ function CVPageContent({
           </div>
           <div className="grid-skills col-span-12">
             {renderSkills()}
+            {renderLanguages()}
           </div>
           <div className="grid-sections col-span-12">
             {renderCustomSections()}
@@ -571,6 +648,7 @@ function CVPageContent({
           {renderEducation()}
           {renderExperience()}
           {renderSkills()}
+          {renderLanguages()}
           {renderCustomSections()}
         </div>
       </div>
@@ -588,6 +666,7 @@ function CVPageContent({
           {renderEducation()}
           {renderExperience()}
           {renderSkills()}
+          {renderLanguages()}
           {renderCustomSections()}
         </div>
       </div>
@@ -608,6 +687,7 @@ function CVPageContent({
         {renderEducation()}
         {renderExperience()}
         {renderSkills()}
+        {renderLanguages()}
         {renderCustomSections()}
       </div>
     </div>
@@ -622,7 +702,9 @@ function createEmptyCVData(): CVData {
     education: [],
     experience: [],
     skills: [],
+    languages: [],
     sections: [],
+    pages: [],
     professionalSummary: '',
   };
 }
