@@ -3,11 +3,25 @@ import { useCV } from '@/hooks/useCV';
 import { Mail, Phone, MapPin, Globe, Calendar, User } from 'lucide-react';
 import type { CVData, CVSettings } from '@/types/cv';
 
+const A4_WIDTH_PX = 794;  // 210mm at 96 DPI
 const A4_HEIGHT_PX = 1123; // 297mm at 96 DPI
 
 export function CVPreview() {
   const { cvData, settings } = useCV();
   const [pages, setPages] = useState<CVData[]>([]);
+
+  // Scale the preview to fit small screens
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const updateScale = () => {
+      const available = window.innerWidth - 32; // 16px padding on each side
+      setScale(Math.min(1, available / A4_WIDTH_PX));
+    };
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
 
   // Split content across pages based on template
   useEffect(() => {
@@ -119,7 +133,7 @@ export function CVPreview() {
   const photoSizeMap: Record<string, number> = { sm: 80, md: 120, lg: 160, xl: 200 };
   const photoSize = photoSizeMap[settings.photoStyle.size] || 120;
 
-      return (
+  return (
     <div className="cv-wrapper flex flex-col items-center gap-0">
       {pages.map((pageData, pageIdx) => (
         <div key={pageIdx}>
@@ -154,30 +168,6 @@ export function CVPreview() {
           </div>
         </div>
       ))}
-
-      {/* Print version — all content on proper A4 pages */}
-      <div className="hidden print:block">
-        {pages.map((pageData, pageIdx) => (
-          <div
-            key={`print-${pageIdx}`}
-            className={`cv-page ${templateClass} ${fontClass}`}
-            style={{
-              background: settings.cvBackgroundColor,
-              padding: `${settings.pagePadding}px`,
-            }}
-          >
-            <CVPageContent
-              cvData={pageData}
-              settings={settings}
-              isFirstPage={pageIdx === 0}
-              photoClasses={photoClasses}
-              photoSize={photoSize}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 
       {/* Print version — all content on proper A4 pages */}
       <div className="hidden print:block">
