@@ -119,7 +119,7 @@ export function CVPreview() {
   const photoSizeMap: Record<string, number> = { sm: 80, md: 120, lg: 160, xl: 200 };
   const photoSize = photoSizeMap[settings.photoStyle.size] || 120;
 
-  return (
+      return (
     <div className="cv-wrapper flex flex-col items-center gap-0">
       {pages.map((pageData, pageIdx) => (
         <div key={pageIdx}>
@@ -131,7 +131,36 @@ export function CVPreview() {
             </div>
           )}
           <div
-            className={`cv-page shadow-lg ${templateClass} ${fontClass} no-print`}
+            className="overflow-hidden"
+            style={{ width: A4_WIDTH_PX * scale, height: A4_HEIGHT_PX * scale }}
+          >
+            <div
+              className={`cv-page shadow-lg ${templateClass} ${fontClass} no-print`}
+              style={{
+                background: settings.cvBackgroundColor,
+                padding: `${settings.pagePadding}px`,
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+              }}
+            >
+              <CVPageContent
+                cvData={pageData}
+                settings={settings}
+                isFirstPage={pageIdx === 0}
+                photoClasses={photoClasses}
+                photoSize={photoSize}
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {/* Print version — all content on proper A4 pages */}
+      <div className="hidden print:block">
+        {pages.map((pageData, pageIdx) => (
+          <div
+            key={`print-${pageIdx}`}
+            className={`cv-page ${templateClass} ${fontClass}`}
             style={{
               background: settings.cvBackgroundColor,
               padding: `${settings.pagePadding}px`,
@@ -145,8 +174,10 @@ export function CVPreview() {
               photoSize={photoSize}
             />
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+    </div>
+  );
 
       {/* Print version — all content on proper A4 pages */}
       <div className="hidden print:block">
