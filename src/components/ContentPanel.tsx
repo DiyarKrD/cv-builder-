@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useCV } from '@/hooks/useCV';
-import { Plus, Trash2, GripVertical, Eye, EyeOff, User, GraduationCap, Phone, Briefcase, Wrench, FileText, Globe, Award, Trophy, FolderOpen, Users, Heart } from 'lucide-react';
-import { SECTION_TYPES } from '@/types/cv';
-import type { CustomSection } from '@/types/cv';
+import { Plus, Trash2, GripVertical, Eye, EyeOff, User, GraduationCap, Phone, Briefcase, Wrench, FileText, Globe, Award, Trophy, FolderOpen, Users, Heart, Languages, Layers, ArrowUp, ArrowDown, X } from 'lucide-react';
+import { SECTION_TYPES, LANGUAGE_LEVELS, SUGGESTED_LANGUAGES } from '@/types/cv';
+import type { CustomSection, LanguageLevel } from '@/types/cv';
 
 const sectionTypeIcons: Record<string, React.ElementType> = {
   text: FileText,
@@ -20,12 +20,48 @@ export function ContentPanel() {
     updateEducation, addEducation, removeEducation,
     updateExperience, addExperience, removeExperience,
     updateSkills, updateSection, addSection, removeSection, reorderSections,
+    addLanguage, updateLanguage, removeLanguage,
+    addPage, removePage, movePage, togglePageSection, clearPages,
   } = useCV();
 
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [newLangName, setNewLangName] = useState('');
+  const [newLangLevel, setNewLangLevel] = useState<LanguageLevel>('intermediate');
 
   const allSections = cvData.sections.filter(s => s.visible !== false);
+  const pagesConfig = cvData.pages ?? [];
+  const languages = cvData.languages ?? [];
+
+  // Content blocks that can be assigned to a manual page
+  const contentBlocks = [
+    { key: 'summary', label: 'Professional Summary' },
+    { key: 'education', label: 'Education' },
+    { key: 'experience', label: 'Work Experience' },
+    { key: 'skills', label: 'Skills' },
+    { key: 'languages', label: 'Languages' },
+    ...(cvData.sections ?? []).map(s => ({ key: s.id, label: s.title || 'Untitled Section' })),
+  ];
+  const blockLabel = (key: string) => contentBlocks.find(b => b.key === key)?.label ?? 'Section';
+
+  // Suggested languages not added yet (for the quick-add chips)
+  const remainingSuggestions = SUGGESTED_LANGUAGES.filter(
+    sl => !languages.some(al => al.name.toLowerCase() === sl.name.toLowerCase())
+  );
+
+  // Flag preview for the typed language name
+  const typedMatch = SUGGESTED_LANGUAGES.find(
+    sl => sl.name.toLowerCase() === newLangName.trim().toLowerCase()
+  );
+
+  const handleAddLanguage = () => {
+    const name = newLangName.trim();
+    if (!name) return;
+    const match = SUGGESTED_LANGUAGES.find(sl => sl.name.toLowerCase() === name.toLowerCase());
+    addLanguage(name, match?.flag ?? '🌐', newLangLevel);
+    setNewLangName('');
+    setNewLangLevel('intermediate');
+  };
 
   const handleDragStart = (id: string) => {
     setDraggedId(id);
@@ -251,6 +287,93 @@ export function ContentPanel() {
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            {/* Languages */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                <Languages className="w-4 h-4" /> Languages
+              </h3>
+              <div className="space-y-2">
+                {languages.map(lang => (
+                  <div key={lang.id} className="grid grid-cols-[auto_1fr_auto_auto] gap-2 items-center">
+                    <span className="text-xl w-7 text-center" title={lang.name}>{lang.flag}</span>
+                    <input
+                      type="text"
+                      placeholder="Language"
+                      value={lang.name}
+                      onChange={e => updateLanguage(lang.id, 'name', e.target.value)}
+                      className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <select
+                      value={lang.level}
+                      onChange={e => updateLanguage(lang.id, 'level', e.target.value)}
+                      className="px-2 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {LANGUAGE_LEVELS.map(l => (
+                        <option key={l.value} value={l.value}>{l.label}</option>
+                      ))}
+                    </select>
+                    <button onClick={() => removeLanguage(lang.id)} className="text-red-400 hover:text-red-600 p-1">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add new language */}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="text-xl w-7 text-center">{(typedMatch && newLangName.trim()) ? typedMatch.flag : '🌐'}</span>
+                  <input
+                    type="text"
+                    list="language-suggestions"
+                    placeholder="Type or pick a language"
+                    value={newLangName}
+                    onChange={e => setNewLangName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddLanguage(); } }}
+                    className="flex-1 min-w-[140px] px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <datalist id="language-suggestions">
+                    {SUGGESTED_LANGUAGES.map(sl => (
+                      <option key={sl.name} value={sl.name} />
+                    ))}
+                  </datalist>
+                  <select
+                    value={newLangLevel}
+                    onChange={e => setNewLangLevel(e.target.value as LanguageLevel)}
+                    className="px-2 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {LANGUAGE_LEVELS.map(l => (
+                      <option key={l.value} value={l.value}>{l.label}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleAddLanguage}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium flex items-center gap-1"
+                  >
+                    <Plus className="w-4 h-4" /> Add
+                  </button>
+                </div>
+
+                {/* Quick-add suggested languages with flags */}
+                {remainingSuggestions.length > 0 && (
+                  <div className="pt-2">
+                    <p className="text-xs text-gray-400 mb-1.5">Suggested languages — click to add:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {remainingSuggestions.map(sl => (
+                        <button
+                          key={sl.name}
+                          onClick={() => addLanguage(sl.name, sl.flag, 'intermediate')}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                        >
+                          <span>{sl.flag}</span>
+                          <span>{sl.name}</span>
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -335,6 +458,117 @@ export function ContentPanel() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Pages Manager */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+              <Layers className="w-4 h-4" /> Pages
+              {pagesConfig.length === 0 ? (
+                <span className="text-xs font-normal text-gray-400">(automatic layout)</span>
+              ) : (
+                <span className="text-xs font-normal text-gray-400">(manual layout)</span>
+              )}
+            </h3>
+            {pagesConfig.length > 0 && (
+              <button
+                onClick={clearPages}
+                className="text-xs text-gray-500 hover:text-gray-700 underline underline-offset-2"
+              >
+                Back to automatic layout
+              </button>
+            )}
+          </div>
+
+          {pagesConfig.length === 0 && (
+            <p className="text-xs text-gray-500 mb-3">
+              Pages are created automatically as content grows. Switch to manual mode to add blank
+              pages freely and choose exactly which sections go on each page.
+            </p>
+          )}
+
+          {pagesConfig.length > 0 && (
+            <div className="space-y-2 mb-4">
+              {pagesConfig.map((page, idx) => (
+                <div key={page.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-700">Page {idx + 1}</span>
+                    <div className="ml-auto flex items-center gap-0.5">
+                      <button
+                        onClick={() => movePage(page.id, -1)}
+                        disabled={idx === 0}
+                        className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                        title="Move page up"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => movePage(page.id, 1)}
+                        disabled={idx === pagesConfig.length - 1}
+                        className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                        title="Move page down"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => removePage(page.id)}
+                        className="p-1 text-red-400 hover:text-red-600"
+                        title="Delete page"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Assigned sections as removable chips */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {page.sections.length === 0 && (
+                      <span className="text-xs text-gray-400 italic">Blank page — assign sections below</span>
+                    )}
+                    {page.sections.map(key => (
+                      <span
+                        key={key}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
+                      >
+                        {blockLabel(key)}
+                        <button
+                          onClick={() => togglePageSection(page.id, key)}
+                          className="hover:text-blue-900"
+                          title="Remove from this page"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Add section to this page */}
+                  <select
+                    value=""
+                    onChange={e => {
+                      if (e.target.value) togglePageSection(page.id, e.target.value);
+                    }}
+                    className="w-full sm:w-64 px-2 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">+ Add a section to this page…</option>
+                    {contentBlocks
+                      .filter(b => !page.sections.includes(b.key))
+                      .map(b => (
+                        <option key={b.key} value={b.key}>{b.label}</option>
+                      ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button
+            onClick={addPage}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> {pagesConfig.length === 0 ? 'Start Custom Pages' : 'Add Blank Page'}
+          </button>
         </div>
       </div>
     </div>
