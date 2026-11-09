@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
-import { DEFAULT_CV_DATA, DEFAULT_SETTINGS, type CVData, type CVSettings, type CustomSection, type PhotoStyle } from '@/types/cv';
+import { DEFAULT_CV_DATA, DEFAULT_SETTINGS, type CVData, type CVSettings, type CustomSection, type PhotoStyle, type LanguageLevel } from '@/types/cv';
 
 interface CVContextType {
   cvData: CVData;
@@ -15,10 +15,18 @@ interface CVContextType {
   addExperience: () => void;
   removeExperience: (id: string) => void;
   updateSkills: (skills: string[]) => void;
+  addLanguage: (name: string, flag: string, level?: LanguageLevel) => void;
+  updateLanguage: (id: string, field: string, value: string) => void;
+  removeLanguage: (id: string) => void;
   updateSection: (id: string, field: string, value: string | boolean) => void;
   addSection: (type: CustomSection['type']) => void;
   removeSection: (id: string) => void;
   reorderSections: (sections: CustomSection[]) => void;
+  addPage: () => void;
+  removePage: (id: string) => void;
+  movePage: (id: string, direction: -1 | 1) => void;
+  togglePageSection: (pageId: string, sectionKey: string) => void;
+  clearPages: () => void;
   updateSetting: <K extends keyof CVSettings>(key: K, value: CVSettings[K]) => void;
   updatePhotoStyle: (style: Partial<PhotoStyle>) => void;
   setActivePanel: (panel: string | null) => void;
@@ -89,6 +97,24 @@ export function CVProvider({ children }: { children: ReactNode }) {
     setCVData(prev => ({ ...prev, skills }));
   }, []);
 
+  const addLanguage = useCallback((name: string, flag: string, level: LanguageLevel = 'intermediate') => {
+    setCVData(prev => ({
+      ...prev,
+      languages: [...(prev.languages ?? []), { id: Date.now().toString(), name, flag, level }],
+    }));
+  }, []);
+
+  const updateLanguage = useCallback((id: string, field: string, value: string) => {
+    setCVData(prev => ({
+      ...prev,
+      languages: (prev.languages ?? []).map(lang => (lang.id === id ? { ...lang, [field]: value } : lang)),
+    }));
+  }, []);
+
+  const removeLanguage = useCallback((id: string) => {
+    setCVData(prev => ({ ...prev, languages: (prev.languages ?? []).filter(lang => lang.id !== id) }));
+  }, []);
+
   const updateSection = useCallback((id: string, field: string, value: string | boolean) => {
     setCVData(prev => ({
       ...prev,
@@ -118,11 +144,58 @@ export function CVProvider({ children }: { children: ReactNode }) {
   }, [cvData.sections.length]);
 
   const removeSection = useCallback((id: string) => {
-    setCVData(prev => ({ ...prev, sections: prev.sections.filter(s => s.id !== id) }));
+    setCVData(prev => ({
+      ...prev,
+      sections: prev.sections.filter(s => s.id !== id),
+      // Also remove the section from any manual page assignment
+      pages: (prev.pages ?? []).map(p => ({ ...p, sections: p.sections.filter(k => k !== id) })),
+    }));
   }, []);
 
   const reorderSections = useCallback((sections: CustomSection[]) => {
     setCVData(prev => ({ ...prev, sections: sections.map((s, i) => ({ ...s, order: i })) }));
+  }, []);
+
+  const addPage = useCallback(() => {
+    setCVData(prev => ({
+      ...prev,
+      pages: [...(prev.pages ?? []), { id: Date.now().toString(), sections: [] }],
+    }));
+  }, []);
+
+  const removePage = useCallback((id: string) => {
+    setCVData(prev => ({ ...prev, pages: (prev.pages ?? []).filter(p => p.id !== id) }));
+  }, []);
+
+  const movePage = useCallback((id: string, direction: -1 | 1) => {
+    setCVData(prev => {
+      const pages = [...(prev.pages ?? [])];
+      const idx = pages.findIndex(p => p.id === id);
+      const target = idx + direction;
+      if (idx === -1 || target < 0 || target >= pages.length) return prev;
+      [pages[idx], pages[target]] = [pages[target], pages[idx]];
+      return { ...prev, pages };
+    });
+  }, []);
+
+  const togglePageSection = useCallback((pageId: string, sectionKey: string) => {
+    setCVData(prev => ({
+      ...prev,
+      pages: (prev.pages ?? []).map(p =>
+        p.id === pageId
+          ? {
+              ...p,
+              sections: p.sections.includes(sectionKey)
+                ? p.sections.filter(k => k !== sectionKey)
+                : [...p.sections, sectionKey],
+            }
+          : p
+      ),
+    }));
+  }, []);
+
+  const clearPages = useCallback(() => {
+    setCVData(prev => ({ ...prev, pages: [] }));
   }, []);
 
   const updateSetting = useCallback(<K extends keyof CVSettings>(key: K, value: CVSettings[K]) => {
@@ -153,10 +226,18 @@ export function CVProvider({ children }: { children: ReactNode }) {
         addExperience,
         removeExperience,
         updateSkills,
+        addLanguage,
+        updateLanguage,
+        removeLanguage,
         updateSection,
         addSection,
         removeSection,
         reorderSections,
+        addPage,
+        removePage,
+        movePage,
+        togglePageSection,
+        clearPages,
         updateSetting,
         updatePhotoStyle,
         setActivePanel,
