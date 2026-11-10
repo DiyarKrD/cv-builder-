@@ -73,22 +73,24 @@ export function CustomizePanel() {
         {/* Photo */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-            <Image className="w-4 h-4" /> Photo Style
+            <Image className="w-4 h-4" /> Photo
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+          <p className="text-xs text-gray-400 mb-3">
+            The photo is a movable block — drag it by its grip handle in the CV preview to place it anywhere between sections.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Position</label>
-              <select
-                value={settings.photoPosition}
-                onChange={e => updateSetting('photoPosition', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Visibility</label>
+              <button
+                onClick={() => updateSetting('photoVisible', !settings.photoVisible)}
+                className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  settings.photoVisible
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
               >
-                <option value="top-left">Top Left</option>
-                <option value="top-center">Top Center</option>
-                <option value="top-right">Top Right</option>
-                <option value="inline">Inline with Text</option>
-                <option value="hidden">Hidden</option>
-              </select>
+                {settings.photoVisible ? 'Visible' : 'Hidden'}
+              </button>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Shape</label>
