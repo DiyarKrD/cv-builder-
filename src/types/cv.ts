@@ -42,7 +42,10 @@ export interface Language {
   id: string;
   name: string;
   level: LanguageLevel;
-  /** 2-letter ISO country code used to render the flag image (e.g. 'gb', 'iq'). */
+  /**
+   * Usually a 2-letter ISO country code rendered via flagcdn.com (e.g. 'gb', 'iq').
+   * Can also be an emoji such as '⭐' for languages without an ISO flag (Kurdish).
+   */
   flag: string;
 }
 
@@ -67,7 +70,7 @@ export interface CVData {
   sections: CustomSection[];
   pages: CVPage[];
   professionalSummary: string;
-  /** Global order of section keys: 'summary' | 'education' | 'experience' | 'skills' | 'languages' | custom section id */
+  /** Global order of section keys: 'photo' | 'summary' | 'education' | 'experience' | 'skills' | 'languages' | custom section id */
   sectionOrder: string[];
 }
 
@@ -81,7 +84,8 @@ export interface CVSettings {
   nameFontSize: number;
   professionFontSize: number;
   fontFamily: string;
-  photoPosition: string;
+  /** Whether the photo block is shown on the CV at all. */
+  photoVisible: boolean;
   photoStyle: PhotoStyle;
   sectionSpacing: number;
   pagePadding: number;
@@ -124,15 +128,15 @@ export const DEFAULT_CV_DATA: CVData = {
   ],
   skills: ['AutoCAD', 'MATLAB', 'PLC Programming', 'Electrical Design', 'Project Management', 'Power Systems', 'Renewable Energy'],
   languages: [
-    { id: 'lang-1', name: 'Kurdish', level: 'native', flag: 'iq' },
+    { id: 'lang-1', name: 'Kurdish', level: 'native', flag: '⭐' },
     { id: 'lang-2', name: 'English', level: 'fluent', flag: 'gb' },
-    { id: 'lang-3', name: 'Arabic', level: 'fluent', flag: 'sa' },
+    { id: 'lang-3', name: 'Arabic', level: 'fluent', flag: 'iq' },
   ],
   sections: [],
   pages: [],
   professionalSummary:
     'Dedicated Electrical Engineer with 4+ years of experience in power systems design and renewable energy solutions. Proven track record in optimizing electrical systems and leading successful project teams.',
-  sectionOrder: ['summary', 'education', 'experience', 'skills', 'languages'],
+  sectionOrder: ['photo', 'summary', 'education', 'experience', 'skills', 'languages'],
 };
 
 export const DEFAULT_SETTINGS: CVSettings = {
@@ -145,7 +149,7 @@ export const DEFAULT_SETTINGS: CVSettings = {
   nameFontSize: 36,
   professionFontSize: 18,
   fontFamily: 'Inter',
-  photoPosition: 'top-left',
+  photoVisible: true,
   photoStyle: { shape: 'rounded', size: 'md', border: 'none' },
   sectionSpacing: 24,
   pagePadding: 40,
@@ -209,13 +213,14 @@ export const LANGUAGE_LEVELS: { value: LanguageLevel; label: string; dots: numbe
 ];
 
 /**
- * Flag values are 2-letter ISO country codes (flagcdn.com), not emojis —
+ * Flag values are usually 2-letter ISO country codes (flagcdn.com), not emojis —
  * emoji flags don't render on Windows and show as "GB"/"TR" text instead.
+ * Exception: Kurdish uses the ⭐ star emoji because Kurdistan has no ISO code.
  */
 export const SUGGESTED_LANGUAGES: { name: string; flag: string }[] = [
   { name: 'English', flag: 'gb' },
-  { name: 'Kurdish', flag: 'iq' },
-  { name: 'Arabic', flag: 'sa' },
+  { name: 'Kurdish', flag: '⭐' },
+  { name: 'Arabic', flag: 'iq' },
   { name: 'Turkish', flag: 'tr' },
   { name: 'Persian', flag: 'ir' },
   { name: 'German', flag: 'de' },
