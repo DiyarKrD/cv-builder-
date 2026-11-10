@@ -611,7 +611,7 @@ function estimateTextHeight(text: string, fontSize: number, lineHeight: number, 
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function estimateKeyHeight(k: string, cvData: any, s_: CVSettings): number {
+function estimateKeyHeight(k: string, cvData: any): number  {
   switch (k) {
     case 'summary':
       return estimateTextHeight(cvData.professionalSummary || ' ', 14, 1.6, 60) + 30;
