@@ -15,41 +15,94 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
+.animate-fade-in { animation: fadeIn 0.3s ease-out; }
 
-/* CV Page */
+/* CV Page — the SAME node is used for screen and print */
 .cv-page {
-  width: 210mm;
-  min-height: 297mm;
+  width: 794px;          /* 210mm at 96 DPI (screen) */
+  height: 1123px;        /* 297mm at 96 DPI (screen) */
   background: white;
   position: relative;
   overflow: hidden;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
-
-.cv-page-content {
-  height: 100%;
-  overflow: hidden;
-}
+.cv-outer { overflow: hidden; position: relative; }
 
 /* Page break indicator (editor only) */
 .page-break-indicator {
-  display: flex;
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; padding: 12px 0; color: #94a3b8; font-size: 12px; font-weight: 500;
+}
+.page-break-line { flex: 1; height: 1px; border-top: 2px dashed #cbd5e1; max-width: 200px; }
+
+/* ============ Inline editing (screen only) ============ */
+.editable {
+  outline: none;
+  cursor: text;
+  border-radius: 2px;
+  min-width: 1ch;
+}
+.cv-page .editable:hover { box-shadow: 0 1px 0 0 rgba(59,130,246,.55); }
+.cv-page .editable:focus {
+  box-shadow: 0 0 0 2px rgba(59,130,246,.35);
+  background: rgba(59,130,246,.06);
+}
+.editable:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+/* ============ Draggable blocks ============ */
+.cv-block { position: relative; border-radius: 4px; }
+.cv-block:hover { outline: 1px dashed rgba(59,130,246,.45); outline-offset: 2px; }
+.cv-block.is-dragging { opacity: .45; outline: 2px dashed #3b82f6; }
+.block-handle {
+  position: absolute; top: 0; right: 0; z-index: 10;
+  width: 22px; height: 22px; border-radius: 6px;
+  background: #3b82f6; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: grab; opacity: 0; transition: opacity .15s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+.cv-block:hover .block-handle { opacity: 1; }
+.block-handle:active { cursor: grabbing; }
+
+/* Arrange-sections chips in the Content panel */
+.arrange-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 10px; background: #fff;
+  border: 1px solid #bfdbfe; border-radius: 9999px;
+  font-size: 12px; font-weight: 500; color: #1e40af;
+  cursor: grab; user-select: none;
+  transition: box-shadow .15s ease, transform .15s ease;
+}
+.arrange-chip:hover { box-shadow: 0 2px 6px rgba(37,99,235,.2); transform: translateY(-1px); }
+.arrange-chip:active { cursor: grabbing; }
+
+/* Skill tag internals */
+.skill-tag {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 12px 0;
-  color: #94a3b8;
-  font-size: 12px;
+  gap: 2px;
+  padding: 4px 12px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 9999px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
-.page-break-line {
-  flex: 1;
-  height: 1px;
-  border-top: 2px dashed #cbd5e1;
-  max-width: 200px;
+button.skill-tag { font: inherit; font-size: 0.875rem; cursor: pointer; }
+.tag-remove {
+  display: none; align-items: center; justify-content: center;
+  margin-left: 2px; padding: 0; border: none; background: none;
+  color: inherit; opacity: .7; cursor: pointer;
 }
+.skill-tag:hover .tag-remove { display: inline-flex; }
+.tag-remove:hover { opacity: 1; }
+.exp-bullet { flex-shrink: 0; }
 
 /* Template 1: Modern Minimalist */
 .template-modern-minimalist { background: white; }
@@ -150,7 +203,7 @@
 
 /* Template 20: Contact Bottom */
 .template-contact-bottom { display: flex; flex-direction: column; }
-.template-contact-bottom .contact-section { order: 999; margin-top: 32px; padding-top: 32px; border-top: 2px solid #e5e7eb; }
+.template-contact-bottom .contact-section { order: 999; }
 
 /* Template 21: Striped Sections */
 .template-striped section:nth-child(odd) { background: #f8fafc; padding: 16px 40px; margin: 0 -40px; }
@@ -165,101 +218,42 @@
 .photo-rounded { border-radius: 12px; }
 .photo-circle { border-radius: 50%; }
 .photo-hexagon { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
-
 .photo-sm { width: 80px; height: 80px; }
 .photo-md { width: 120px; height: 120px; }
 .photo-lg { width: 160px; height: 160px; }
 .photo-xl { width: 200px; height: 200px; }
-
 .photo-border-none { border: none; }
 .photo-border-thin { border: 2px solid #e5e7eb; }
 .photo-border-thick { border: 4px solid var(--primary-color, #3b82f6); }
 .photo-border-colored { border: 4px solid var(--primary-color, #3b82f6); }
 .photo-border-shadow { box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
 
-/* Print Styles - NO WATERMARK */
-@media print {
-  .no-print { display: none !important; }
-  body { background: white !important; margin: 0 !important; }
-  .cv-page {
-    box-shadow: none !important;
-    margin: 0 !important;
-    page-break-after: always;
-    width: 210mm !important;
-    min-height: 297mm !important;
-    max-height: 297mm !important;
-  }
-  .cv-page:last-child { page-break-after: auto; }
-  .page-break-indicator { display: none !important; }
-  .cv-wrapper { padding: 0 !important; gap: 0 !important; }
-  .cv-page { margin-bottom: 0 !important; }
-}
-
 /* Color Picker */
 input[type="color"] {
-  -webkit-appearance: none;
-  border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  overflow: hidden;
-  cursor: pointer;
-  padding: 0;
+  -webkit-appearance: none; border: none; width: 36px; height: 36px;
+  border-radius: 50%; overflow: hidden; cursor: pointer; padding: 0;
 }
 input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
 input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
 
 /* Range Slider */
 input[type="range"] {
-  -webkit-appearance: none;
-  height: 6px;
-  border-radius: 3px;
-  background: #e5e7eb;
-  outline: none;
-  width: 100%;
+  -webkit-appearance: none; height: 6px; border-radius: 3px;
+  background: #e5e7eb; outline: none; width: 100%;
 }
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #3b82f6;
-  cursor: pointer;
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: #3b82f6; cursor: pointer;
 }
 
 /* Template Card */
-.template-card {
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-.template-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-}
-.template-card.active {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
+.template-card { transition: all 0.3s ease; cursor: pointer; }
+.template-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+.template-card.active { outline: 2px solid #3b82f6; outline-offset: 2px; }
 
-/* Drag handle */
-.drag-handle {
-  cursor: grab;
-  color: #94a3b8;
-}
-.drag-handle:active {
-  cursor: grabbing;
-}
-
-/* Skill tag */
-.skill-tag {
-  display: inline-block;
-  padding: 4px 12px;
-  background: #eff6ff;
-  color: #3b82f6;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
+/* Drag handle (legacy class, still used in panels) */
+.drag-handle { cursor: grab; color: #94a3b8; }
+.drag-handle:active { cursor: grabbing; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -267,10 +261,76 @@ input[type="range"]::-webkit-slider-thumb {
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* Language proficiency dots (used in the Languages section) */
-.lang-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+/* Language proficiency dots */
+.lang-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+
+/* ==================================================================
+   PRINT — WYSIWYG: prints the exact same nodes shown on screen.
+   - @page margin 0  → no browser margins, no extra pages
+   - no margins      → browser headers/footers (date/url/page no.) vanish
+   - same .cv-page   → identical positions to the preview
+   ================================================================== */
+@media print {
+  @page { size: A4; margin: 0; }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    width: 210mm;
+  }
+
+  /* Hide everything except the CV */
+  body * { visibility: hidden !important; }
+  #cv-root, #cv-root * { visibility: visible !important; }
+  #cv-root {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  .no-print,
+  .page-break-indicator,
+  .block-handle,
+  .tag-remove,
+  .skill-add { display: none !important; }
+
+  /* One screen page = one printed page, exactly A4 */
+  .page-shell {
+    page-break-after: always;
+    break-after: page;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .page-shell:last-of-type {
+    page-break-after: auto;
+    break-after: auto;
+  }
+  .cv-outer {
+    width: 210mm !important;
+    height: 297mm !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+  }
+  .cv-page {
+    width: 210mm !important;
+    height: 297mm !important;
+    min-height: 0 !important;
+    transform: none !important;
+    transform-origin: top left !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Strip all editing affordances */
+  .cv-block { outline: none !important; }
+  .editable {
+    box-shadow: none !important;
+    background: transparent !important;
+    cursor: default;
+  }
 }
