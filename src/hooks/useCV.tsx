@@ -1,225 +1,336 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
-import { DEFAULT_CV_DATA, DEFAULT_SETTINGS } from '@/types/cv';
-import type { CVData, CVSettings, Education, Experience, CustomSection, Language, LanguageLevel, CVPage } from '@/types/cv';
 
-export type PanelType = 'templates' | 'customize' | 'content' | 'ai';
+import { useCV } from '@/hooks/useCV';
+import { FONT_OPTIONS } from '@/types/cv';
+import { Type, Image, Layout, Palette } from 'lucide-react';
 
-interface CVContextValue {
-  cvData: CVData;
-  settings: CVSettings;
-  activePanel: PanelType;
-  setActivePanel: (panel: PanelType) => void;
-  updateSetting: <K extends keyof CVSettings>(key: K, value: CVSettings[K]) => void;
-  updatePersonal: (field: keyof CVData['personal'], value: string | null) => void;
-  updateContact: (field: keyof CVData['contact'], value: string) => void;
-  updateProfessionalSummary: (value: string) => void;
-  updateEducation: (id: string, field: keyof Education, value: string) => void;
-  addEducation: () => void;
-  removeEducation: (id: string) => void;
-  updateExperience: (id: string, field: keyof Experience, value: string) => void;
-  addExperience: () => void;
-  removeExperience: (id: string) => void;
-  updateSkills: (skills: string[]) => void;
-  updateSection: (id: string, field: keyof CustomSection, value: string | boolean) => void;
-  addSection: (type: CustomSection['type']) => void;
-  removeSection: (id: string) => void;
-  reorderSections: (sections: CustomSection[]) => void;
-  addLanguage: (name: string, flag: string, level: LanguageLevel) => void;
-  updateLanguage: (id: string, field: keyof Language, value: string) => void;
-  removeLanguage: (id: string) => void;
-  addPage: () => void;
-  removePage: (id: string) => void;
-  movePage: (id: string, direction: -1 | 1) => void;
-  togglePageSection: (pageId: string, sectionKey: string) => void;
-  clearPages: () => void;
-  updateCVData: (data: CVData) => void;
-  resetCV: () => void;
-}
+export function CustomizePanel() {
+  const { settings, updateSetting, updatePhotoStyle } = useCV();
 
-const CVContext = createContext<CVContextValue | null>(null);
-
-let idCounter = 0;
-const genId = (prefix: string) => `${prefix}-${Date.now()}-${idCounter++}`;
-
-export function CVProvider({ children }: { children: ReactNode }) {
-  const [cvData, setCVData] = useState<CVData>(DEFAULT_CV_DATA);
-  const [settings, setSettings] = useState<CVSettings>(DEFAULT_SETTINGS);
-  const [activePanel, setActivePanel] = useState<PanelType>('content');
-
-  const updateSetting = <K extends keyof CVSettings>(key: K, value: CVSettings[K]) =>
-    setSettings(prev => ({ ...prev, [key]: value }));
-
-  const updatePersonal = (field: keyof CVData['personal'], value: string | null) =>
-    setCVData(prev => ({ ...prev, personal: { ...prev.personal, [field]: value } }));
-
-  const updateContact = (field: keyof CVData['contact'], value: string) =>
-    setCVData(prev => ({ ...prev, contact: { ...prev.contact, [field]: value } }));
-
-  const updateProfessionalSummary = (value: string) =>
-    setCVData(prev => ({ ...prev, professionalSummary: value }));
-
-  const updateEducation = (id: string, field: keyof Education, value: string) =>
-    setCVData(prev => ({
-      ...prev,
-      education: prev.education.map(ed => (ed.id === id ? { ...ed, [field]: value } : ed)),
-    }));
-
-  const addEducation = () =>
-    setCVData(prev => ({
-      ...prev,
-      education: [...prev.education, { id: genId('edu'), degree: '', university: '', year: '' }],
-    }));
-
-  const removeEducation = (id: string) =>
-    setCVData(prev => ({ ...prev, education: prev.education.filter(ed => ed.id !== id) }));
-
-  const updateExperience = (id: string, field: keyof Experience, value: string) =>
-    setCVData(prev => ({
-      ...prev,
-      experience: prev.experience.map(exp => (exp.id === id ? { ...exp, [field]: value } : exp)),
-    }));
-
-  const addExperience = () =>
-    setCVData(prev => ({
-      ...prev,
-      experience: [
-        ...prev.experience,
-        { id: genId('exp'), title: '', company: '', period: '', description: '' },
-      ],
-    }));
-
-  const removeExperience = (id: string) =>
-    setCVData(prev => ({ ...prev, experience: prev.experience.filter(exp => exp.id !== id) }));
-
-  const updateSkills = (skills: string[]) => setCVData(prev => ({ ...prev, skills }));
-
-  const updateSection = (id: string, field: keyof CustomSection, value: string | boolean) =>
-    setCVData(prev => ({
-      ...prev,
-      sections: prev.sections.map(s => (s.id === id ? { ...s, [field]: value } : s)),
-    }));
-
-  const addSection = (type: CustomSection['type']) =>
-    setCVData(prev => ({
-      ...prev,
-      sections: [
-        ...prev.sections,
-        {
-          id: genId('sec'),
-          type,
-          title: 'New Section',
-          content: '',
-          visible: true,
-          order: prev.sections.length,
-        },
-      ],
-    }));
-
-  const removeSection = (id: string) =>
-    setCVData(prev => ({ ...prev, sections: prev.sections.filter(s => s.id !== id) }));
-
-  const reorderSections = (sections: CustomSection[]) =>
-    setCVData(prev => ({ ...prev, sections }));
-
-  const addLanguage = (name: string, flag: string, level: LanguageLevel) =>
-    setCVData(prev => ({
-      ...prev,
-      languages: [...prev.languages, { id: genId('lang'), name, flag, level }],
-    }));
-
-  const updateLanguage = (id: string, field: keyof Language, value: string) =>
-    setCVData(prev => ({
-      ...prev,
-      languages: prev.languages.map(l => (l.id === id ? { ...l, [field]: value } : l)),
-    }));
-
-  const removeLanguage = (id: string) =>
-    setCVData(prev => ({ ...prev, languages: prev.languages.filter(l => l.id !== id) }));
-
-  const addPage = () =>
-    setCVData(prev => ({
-      ...prev,
-      pages: [...prev.pages, { id: genId('page'), sections: [] } satisfies CVPage],
-    }));
-
-  const removePage = (id: string) =>
-    setCVData(prev => ({ ...prev, pages: prev.pages.filter(p => p.id !== id) }));
-
-  const movePage = (id: string, direction: -1 | 1) =>
-    setCVData(prev => {
-      const idx = prev.pages.findIndex(p => p.id === id);
-      const target = idx + direction;
-      if (idx === -1 || target < 0 || target >= prev.pages.length) return prev;
-      const pages = [...prev.pages];
-      const [moved] = pages.splice(idx, 1);
-      pages.splice(target, 0, moved);
-      return { ...prev, pages };
-    });
-
-  const togglePageSection = (pageId: string, sectionKey: string) =>
-    setCVData(prev => ({
-      ...prev,
-      pages: prev.pages.map(p => {
-        if (p.id !== pageId) return p;
-        return {
-          ...p,
-          sections: p.sections.includes(sectionKey)
-            ? p.sections.filter(k => k !== sectionKey)
-            : [...p.sections, sectionKey],
-        };
-      }),
-    }));
-
-  const clearPages = () => setCVData(prev => ({ ...prev, pages: [] }));
-
-  const updateCVData = (data: CVData) => setCVData(data);
-
-  const resetCV = () => {
-    setCVData(DEFAULT_CV_DATA);
-    setSettings(DEFAULT_SETTINGS);
+  const fontClassMap: Record<string, string> = {
+    Inter: 'font-inter',
+    Playfair: 'font-playfair',
+    Poppins: 'font-poppins',
+    'Roboto Mono': 'font-mono',
+    Oswald: 'font-oswald',
+    Raleway: 'font-raleway',
+    'Bebas Neue': 'font-bebas',
+    'Space Grotesk': 'font-space',
   };
 
   return (
-    <CVContext.Provider
-      value={{
-        cvData,
-        settings,
-        activePanel,
-        setActivePanel,
-        updateSetting,
-        updatePersonal,
-        updateContact,
-        updateProfessionalSummary,
-        updateEducation,
-        addEducation,
-        removeEducation,
-        updateExperience,
-        addExperience,
-        removeExperience,
-        updateSkills,
-        updateSection,
-        addSection,
-        removeSection,
-        reorderSections,
-        addLanguage,
-        updateLanguage,
-        removeLanguage,
-        addPage,
-        removePage,
-        movePage,
-        togglePageSection,
-        clearPages,
-        updateCVData,
-        resetCV,
-      }}
-    >
-      {children}
-    </CVContext.Provider>
+    <div className="bg-white border-b border-gray-200 animate-fade-in">
+      <div className="max-w-[1400px] mx-auto px-4 py-4">
+
+        {/* Colors */}
+        <section className="mb-6">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Palette className="w-4 h-4" /> Colors
+          </h3>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            <ColorPicker label="Primary Color" value={settings.primaryColor} onChange={v => updateSetting('primaryColor', v)} />
+            <ColorPicker label="Secondary Color" value={settings.secondaryColor} onChange={v => updateSetting('secondaryColor', v)} />
+            <ColorPicker label="Name Color" value={settings.nameColor} onChange={v => updateSetting('nameColor', v)} />
+            <ColorPicker label="Profession Color" value={settings.professionColor} onChange={v => updateSetting('professionColor', v)} />
+            <ColorPicker label="CV Background" value={settings.cvBackgroundColor} onChange={v => updateSetting('cvBackgroundColor', v)} />
+          </div>
+        </section>
+
+        {/* Typography */}
+        <section className="mb-6">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Type className="w-4 h-4" /> Typography
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <RangeSlider
+              label="Name Font Size"
+              value={settings.nameFontSize}
+              min={24}
+              max={96}
+              unit="px"
+              onChange={v => updateSetting('nameFontSize', v)}
+            />
+
+            <RangeSlider
+              label="Profession Font Size"
+              value={settings.professionFontSize}
+              min={14}
+              max={48}
+              unit="px"
+              onChange={v => updateSetting('professionFontSize', v)}
+            />
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+                Font Family
+              </label>
+              <select
+                value={settings.fontFamily}
+                onChange={e => updateSetting('fontFamily', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {FONT_OPTIONS.map(font => (
+                  <option
+                    key={font.value}
+                    value={font.value}
+                    className={fontClassMap[font.value]}
+                  >
+                    {font.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </section>
+
+        {/* Photo */}
+        <section className="mb-6">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Image className="w-4 h-4" /> Photo
+          </h3>
+
+          <p className="text-xs text-gray-400 mb-3">
+            The photo is a movable block. Drag it by its grip handle in the CV preview to place it between sections.
+          </p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+                Visibility
+              </label>
+              <button
+                type="button"
+                onClick={() => updateSetting('photoVisible', !settings.photoVisible)}
+                className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  settings.photoVisible
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {settings.photoVisible ? 'Visible' : 'Hidden'}
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+                Shape
+              </label>
+              <select
+                value={settings.photoStyle.shape}
+                onChange={e =>
+                  updatePhotoStyle({
+                    shape: e.target.value as 'square' | 'rounded' | 'circle' | 'hexagon',
+                  })
+                }
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="square">Square</option>
+                <option value="rounded">Rounded</option>
+                <option value="circle">Circle</option>
+                <option value="hexagon">Hexagon</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+                Size
+              </label>
+              <select
+                value={settings.photoStyle.size}
+                onChange={e =>
+                  updatePhotoStyle({
+                    size: e.target.value as 'sm' | 'md' | 'lg' | 'xl',
+                  })
+                }
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="sm">Small (80px)</option>
+                <option value="md">Medium (120px)</option>
+                <option value="lg">Large (160px)</option>
+                <option value="xl">Extra Large (200px)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+                Border
+              </label>
+              <select
+                value={settings.photoStyle.border}
+                onChange={e =>
+                  updatePhotoStyle({
+                    border: e.target.value as 'none' | 'thin' | 'thick' | 'colored' | 'shadow',
+                  })
+                }
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="none">None</option>
+                <option value="thin">Thin</option>
+                <option value="thick">Thick</option>
+                <option value="colored">Colored</option>
+                <option value="shadow">Shadow</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        {/* Layout */}
+        <section>
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Layout className="w-4 h-4" /> Layout
+          </h3>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+            <RangeSlider
+              label="Section Spacing"
+              value={settings.sectionSpacing}
+              min={0}
+              max={60}
+              unit="px"
+              onChange={v => updateSetting('sectionSpacing', v)}
+            />
+
+            <RangeSlider
+              label="Page Padding"
+              value={settings.pagePadding}
+              min={20}
+              max={80}
+              unit="px"
+              onChange={v => updateSetting('pagePadding', v)}
+            />
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+                Name Position
+              </label>
+              <select
+                value={settings.namePosition}
+                onChange={e => updateSetting('namePosition', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="default">Default</option>
+                <option value="center">Center</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+                Contact Position
+              </label>
+              <select
+                value={settings.contactPosition}
+                onChange={e => updateSetting('contactPosition', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="below-header">Below Header</option>
+                <option value="sidebar">Sidebar Style</option>
+                <option value="bottom">Bottom of CV</option>
+                <option value="top">Top (Above Name)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+              Layout Positioning
+            </label>
+
+            <div className="flex flex-wrap gap-2">
+              {['default', 'split', 'center', 'wide'].map(layout => (
+                <button
+                  type="button"
+                  key={layout}
+                  onClick={() => updateSetting('layout', layout)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition ${
+                    settings.layout === layout
+                      ? 'bg-gray-900 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {layout === 'default'
+                    ? 'Default Flow'
+                    : layout === 'split'
+                    ? 'Split View'
+                    : layout === 'center'
+                    ? 'Center Aligned'
+                    : 'Wide Stretch'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
   );
 }
 
-export function useCV() {
-  const ctx = useContext(CVContext);
-  if (!ctx) throw new Error('useCV must be used within a CVProvider');
-  return ctx;
+function ColorPicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+        {label}
+      </label>
+
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          title={label}
+        />
+        <span className="text-xs text-gray-500 font-mono">{value}</span>
+      </div>
+    </div>
+  );
+}
+
+function RangeSlider({
+  label,
+  value,
+  min,
+  max,
+  unit,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  unit: string;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
+        {label}
+      </label>
+
+      <div className="flex items-center gap-3">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={value}
+          onChange={e => onChange(Number(e.target.value))}
+          className="flex-1"
+        />
+
+        <span className="text-xs text-gray-500 font-mono w-12 text-right">
+          {value}{unit}
+        </span>
+      </div>
+    </div>
+  );
 }
