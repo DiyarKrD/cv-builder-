@@ -3,6 +3,7 @@ import { useCV } from '@/hooks/useCV';
 import { Mail, Phone, MapPin, Globe, Calendar, User, GripVertical, Plus, X } from 'lucide-react';
 import { LANGUAGE_LEVELS } from '@/types/cv';
 import type { CVSettings } from '@/types/cv';
+import { LanguageFlag } from '@/components/LanguageFlag';
 
 const A4_WIDTH_PX = 794;   // 210mm @ 96dpi
 const A4_HEIGHT_PX = 1123; // 297mm @ 96dpi
@@ -530,7 +531,14 @@ function LanguagesSection({ isCards, isDark }: { isCards: boolean; isDark: boole
               <button className="tag-remove no-print" title="Remove language" onClick={() => removeLanguage(lang.id)}>
                 <X className="w-3 h-3" />
               </button>
-              {lang.flag && <span className="text-base leading-none w-6 text-center shrink-0">{lang.flag}</span>}
+              {lang.flag && (
+                <LanguageFlag
+                  flag={lang.flag}
+                  title={lang.name}
+                  imgClassName="w-5"
+                  spanClassName="text-base leading-none w-6 text-center shrink-0"
+                />
+              )}
               <span className={isDark ? 'text-gray-200' : 'text-gray-800'}>
                 <Editable value={lang.name} onCommit={t => updateLanguage(lang.id, 'name', t)} />
               </span>
@@ -552,7 +560,7 @@ function LanguagesSection({ isCards, isDark }: { isCards: boolean; isDark: boole
           );
         })}
       </div>
-      <button className="row-add no-print" onClick={() => addLanguage('English', '🇬🇧', 'fluent')}>
+      <button className="row-add no-print" onClick={() => addLanguage('English', 'gb', 'fluent')}>
         <Plus className="w-3 h-3" /> Add language
       </button>
     </section>
