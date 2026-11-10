@@ -11,10 +11,8 @@ import type {
   CustomSection,
   Education,
   Experience,
-  Language,
   LanguageLevel,
   PersonalInfo,
-  ContactInfo,
   PhotoStyle,
 } from '@/types/cv';
 
@@ -34,10 +32,10 @@ interface CVContextValue {
   activePanel: ActivePanel;
 
   setCVData: (data: CVData) => void;
-  togglePanel: (panel: Exclude<ActivePanel, null>) => void;
+  togglePanel: (panel: string) => void;
 
   updatePersonal: <K extends keyof PersonalInfo>(field: K, value: PersonalInfo[K]) => void;
-  updateContact: (field: keyof ContactInfo, value: string) => void;
+  updateContact: (field: string, value: string) => void;
   updateProfessionalSummary: (text: string) => void;
 
   updateEducation: <K extends keyof Education>(id: string, field: K, value: Education[K]) => void;
@@ -112,15 +110,15 @@ export function CVProvider({ children }: { children: ReactNode }) {
     setCVDataState(data);
   }, []);
 
-  const togglePanel = useCallback((panel: Exclude<ActivePanel, null>) => {
-    setActivePanel(prev => (prev === panel ? null : panel));
+  const togglePanel = useCallback((panel: string) => {
+    setActivePanel(prev => (prev === panel ? null : (panel as ActivePanel)));
   }, []);
 
   const updatePersonal = useCallback(<K extends keyof PersonalInfo>(field: K, value: PersonalInfo[K]) => {
     setCVDataState(prev => ({ ...prev, personal: { ...prev.personal, [field]: value } }));
   }, []);
 
-  const updateContact = useCallback((field: keyof ContactInfo, value: string) => {
+  const updateContact = useCallback((field: string, value: string) => {
     setCVDataState(prev => ({ ...prev, contact: { ...prev.contact, [field]: value } }));
   }, []);
 
