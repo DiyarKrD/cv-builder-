@@ -101,7 +101,7 @@ export function CVPreview() {
     let cur: string[] = [];
     let h = headerHeight(settings);
     for (const k of ordered) {
-      const kh = estimateKeyHeight(k, cvData, settings);
+      const kh = estimateKeyHeight(k, cvData);
       if (cur.length > 0 && h + kh > maxH) {
         out.push(cur);
         cur = [];
