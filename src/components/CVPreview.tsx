@@ -1,13 +1,13 @@
 import { useMemo, useEffect, useState, useRef } from 'react';
 import { useCV } from '@/hooks/useCV';
-import { Mail, Phone, MapPin, Globe, Calendar, User, GripVertical, Plus, X } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, Calendar, GripVertical, Plus, X } from 'lucide-react';
 import { LANGUAGE_LEVELS } from '@/types/cv';
 import type { CVSettings } from '@/types/cv';
 import { LanguageFlag } from '@/components/LanguageFlag';
 
 const A4_WIDTH_PX = 794;   // 210mm @ 96dpi
 const A4_HEIGHT_PX = 1123; // 297mm @ 96dpi
-const BASE_ORDER = ['summary', 'education', 'experience', 'skills', 'languages'];
+const BASE_ORDER = ['photo', 'summary', 'education', 'experience', 'skills', 'languages'];
 
 /* ------------------------------------------------------------------ */
 /*  Click-to-edit text                                                 */
@@ -89,6 +89,7 @@ export function CVPreview() {
     }
 
     const keys: string[] = [];
+    if (settings.photoVisible && cvData.personal.photo) keys.push('photo');
     if (cvData.professionalSummary) keys.push('summary');
     if (cvData.education.length > 0) keys.push('education');
     if (cvData.experience.length > 0) keys.push('experience');
@@ -102,7 +103,7 @@ export function CVPreview() {
     let cur: string[] = [];
     let h = headerHeight(settings);
     for (const k of ordered) {
-      const kh = estimateKeyHeight(k, cvData);
+      const kh = estimateKeyHeight(k, cvData, settings);
       if (cur.length > 0 && h + kh > maxH) {
         out.push(cur);
         cur = [];
@@ -148,13 +149,6 @@ export function CVPreview() {
 
   const templateClass = `template-${settings.template}`;
 
-  const photoClasses = [
-    `photo-${settings.photoStyle.shape}`,
-    settings.photoStyle.border !== 'none' ? `photo-border-${settings.photoStyle.border}` : '',
-  ].filter(Boolean).join(' ');
-  const photoSizeMap: Record<string, number> = { sm: 80, md: 120, lg: 160, xl: 200 };
-  const photoSize = photoSizeMap[settings.photoStyle.size] || 120;
-
   return (
     <div id="cv-root" className="cv-wrapper flex flex-col items-center">
       {pages.map((keys, pageIdx) => (
@@ -180,7 +174,7 @@ export function CVPreview() {
               }}
             >
               <div className="cv-content h-full" style={{ display: 'flex', flexDirection: 'column' }}>
-                {pageIdx === 0 && <PageHeader photoClasses={photoClasses} photoSize={photoSize} />}
+                {pageIdx === 0 && <PageHeader />}
                 <div className="cv-body flex-1">
                   {keys.map(k => (
                     <SectionBlock
@@ -212,7 +206,7 @@ export function CVPreview() {
 /* ------------------------------------------------------------------ */
 /*  Header (page 1 only) — fully inline editable                       */
 /* ------------------------------------------------------------------ */
-function PageHeader({ photoClasses, photoSize }: { photoClasses: string; photoSize: number }) {
+function PageHeader() {
   const { cvData, settings, updatePersonal, updateContact } = useCV();
   const isDark = settings.template === 'dark-pro' || settings.template === 'executive';
 
@@ -230,25 +224,6 @@ function PageHeader({ photoClasses, photoSize }: { photoClasses: string; photoSi
   return (
     <>
       <div className="cv-header mb-5 flex items-center gap-5">
-        {settings.photoPosition !== 'hidden' && (
-          <div className="shrink-0">
-            {cvData.personal.photo ? (
-              <img
-                src={cvData.personal.photo}
-                alt="Profile"
-                className={photoClasses}
-                style={{ width: photoSize, height: photoSize, objectFit: 'cover' }}
-              />
-            ) : (
-              <div
-                className={`${photoClasses} bg-gray-200 flex items-center justify-center`}
-                style={{ width: photoSize, height: photoSize }}
-              >
-                <User className="w-8 h-8 text-gray-400" />
-              </div>
-            )}
-          </div>
-        )}
         <div className="flex-1">
           <h1 className="cv-name font-bold" style={{ fontSize: settings.nameFontSize, color: nameColor, lineHeight: 1.1 }}>
             <Editable value={cvData.personal.fullName} placeholder="Your Name" onCommit={t => updatePersonal('fullName', t)} />
@@ -335,6 +310,7 @@ function SectionContent({ sectionKey, isCards }: { sectionKey: string; isCards: 
   const { cvData, settings } = useCV();
   const isDark = settings.template === 'dark-pro';
 
+  if (sectionKey === 'photo') return <PhotoSection />;
   if (sectionKey === 'summary') {
     return (
       <section className={`mb-5 summary-section ${isCards ? 'section-card' : ''}`}>
@@ -353,6 +329,31 @@ function SectionContent({ sectionKey, isCards }: { sectionKey: string; isCards: 
   const section = cvData.sections.find(s => s.id === sectionKey);
   if (!section || !section.visible) return null;
   return <CustomSectionBlock section={section} isCards={isCards} isDark={isDark} />;
+}
+
+/* ---------------- Photo (movable block) ---------------- */
+function PhotoSection() {
+  const { cvData, settings } = useCV();
+  if (!settings.photoVisible || !cvData.personal.photo) return null;
+
+  const photoClasses = [
+    `photo-${settings.photoStyle.shape}`,
+    settings.photoStyle.border !== 'none' ? `photo-border-${settings.photoStyle.border}` : '',
+  ].filter(Boolean).join(' ');
+  const photoSizeMap: Record<string, number> = { sm: 80, md: 120, lg: 160, xl: 200 };
+  const photoSize = photoSizeMap[settings.photoStyle.size] || 120;
+
+  return (
+    <section className="mb-5 photo-section">
+      <img
+        src={cvData.personal.photo}
+        alt="Profile"
+        className={photoClasses}
+        style={{ width: photoSize, height: photoSize, objectFit: 'cover' }}
+        draggable={false}
+      />
+    </section>
+  );
 }
 
 function SummaryEditable() {
@@ -608,7 +609,6 @@ function AddSectionButton({ pageId }: { pageId: string | null }) {
 /* ------------------------------------------------------------------ */
 function headerHeight(s: CVSettings): number {
   let h = 60;
-  if (s.photoPosition !== 'hidden') h += 20;
   h += s.nameFontSize + s.professionFontSize + 30;
   return h;
 }
@@ -619,8 +619,12 @@ function estimateTextHeight(text: string, fontSize: number, lineHeight: number, 
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function estimateKeyHeight(k: string, cvData: any): number  {
+function estimateKeyHeight(k: string, cvData: any, settings: CVSettings): number  {
   switch (k) {
+    case 'photo': {
+      const photoSizeMap: Record<string, number> = { sm: 80, md: 120, lg: 160, xl: 200 };
+      return (photoSizeMap[settings.photoStyle.size] || 120) + 30;
+    }
     case 'summary':
       return estimateTextHeight(cvData.professionalSummary || ' ', 14, 1.6, 60) + 30;
     case 'education':
