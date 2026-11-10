@@ -19,9 +19,11 @@ interface CVContextType {
   updateLanguage: (id: string, field: string, value: string) => void;
   removeLanguage: (id: string) => void;
   updateSection: (id: string, field: string, value: string | boolean) => void;
-  addSection: (type: CustomSection['type']) => void;
+  addSection: (type: CustomSection['type']) => string;
   removeSection: (id: string) => void;
   reorderSections: (sections: CustomSection[]) => void;
+  updateSectionOrder: (order: string[]) => void;
+  moveSection: (key: string, targetKey: string) => void;
   addPage: () => void;
   removePage: (id: string) => void;
   movePage: (id: string, direction: -1 | 1) => void;
@@ -132,28 +134,47 @@ export function CVProvider({ children }: { children: ReactNode }) {
       references: 'References',
       hobbies: 'Hobbies & Interests',
     };
-    const newSection: CustomSection = {
-      id: Date.now().toString(),
-      type,
-      title: titles[type],
-      content: '',
-      visible: true,
-      order: cvData.sections.length,
-    };
-    setCVData(prev => ({ ...prev, sections: [...prev.sections, newSection] }));
-  }, [cvData.sections.length]);
+    const id = Date.now().toString();
+    setCVData(prev => ({
+      ...prev,
+      sections: [...prev.sections, { id, type, title: titles[type], content: '', visible: true, order: prev.sections.length }],
+      sectionOrder: [...(prev.sectionOrder ?? []), id],
+    }));
+    return id;
+  }, []);
 
   const removeSection = useCallback((id: string) => {
     setCVData(prev => ({
       ...prev,
       sections: prev.sections.filter(s => s.id !== id),
-      // Also remove the section from any manual page assignment
       pages: (prev.pages ?? []).map(p => ({ ...p, sections: p.sections.filter(k => k !== id) })),
+      sectionOrder: (prev.sectionOrder ?? []).filter(k => k !== id),
     }));
   }, []);
 
   const reorderSections = useCallback((sections: CustomSection[]) => {
     setCVData(prev => ({ ...prev, sections: sections.map((s, i) => ({ ...s, order: i })) }));
+  }, []);
+
+  const updateSectionOrder = useCallback((order: string[]) => {
+    setCVData(prev => ({ ...prev, sectionOrder: order }));
+  }, []);
+
+  const moveSection = useCallback((key: string, targetKey: string) => {
+    if (key === targetKey) return;
+    setCVData(prev => {
+      const order = [...(prev.sectionOrder ?? [])];
+      let from = order.indexOf(key);
+      const to = order.indexOf(targetKey);
+      if (to === -1) return prev;
+      if (from === -1) {
+        order.push(key);
+        from = order.length - 1;
+      }
+      order.splice(from, 1);
+      order.splice(order.indexOf(targetKey), 0, key);
+      return { ...prev, sectionOrder: order };
+    });
   }, []);
 
   const addPage = useCallback(() => {
@@ -233,6 +254,8 @@ export function CVProvider({ children }: { children: ReactNode }) {
         addSection,
         removeSection,
         reorderSections,
+        updateSectionOrder,
+        moveSection,
         addPage,
         removePage,
         movePage,
