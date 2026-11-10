@@ -12,7 +12,7 @@ const BASE_ORDER = ['summary', 'education', 'experience', 'skills', 'languages']
 /*  Click-to-edit text                                                 */
 /* ------------------------------------------------------------------ */
 function Editable({
-  value, onCommit, className = '', style, placeholder, multiline = false, tag = 'span',
+  value, onCommit, className = '', style, placeholder, multiline = false,
 }: {
   value: string;
   onCommit: (text: string) => void;
@@ -421,7 +421,7 @@ function ExperienceSection({ isCards, isDark }: { isCards: boolean; isDark: bool
               <Editable value={exp.period} placeholder="Period" onCommit={t => updateExperience(exp.id, 'period', t)} />
             </h3>
             <ul className="mt-1.5 space-y-0.5">
-              {exp.description.split('\n').filter(Boolean).map((line, i, arr) => (
+              {exp.description.split('\n').filter(Boolean).map((line, i) => (
                 <BulletRow
                   key={i}
                   line={line}
@@ -611,7 +611,7 @@ function estimateTextHeight(text: string, fontSize: number, lineHeight: number, 
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function estimateKeyHeight(k: string, cvData: any, s: CVSettings): number {
+function estimateKeyHeight(k: string, cvData: any, s_: CVSettings): number {
   switch (k) {
     case 'summary':
       return estimateTextHeight(cvData.professionalSummary || ' ', 14, 1.6, 60) + 30;
