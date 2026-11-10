@@ -3,6 +3,7 @@ import { useCV } from '@/hooks/useCV';
 import { Plus, Trash2, GripVertical, Eye, EyeOff, User, GraduationCap, Phone, Briefcase, Wrench, FileText, Globe, Award, Trophy, FolderOpen, Users, Heart, Languages, Layers, ArrowUp, ArrowDown, X } from 'lucide-react';
 import { SECTION_TYPES, LANGUAGE_LEVELS, SUGGESTED_LANGUAGES } from '@/types/cv';
 import type { CustomSection, LanguageLevel } from '@/types/cv';
+import { LanguageFlag } from '@/components/LanguageFlag';
 
 const sectionTypeIcons: Record<string, React.ElementType> = {
   text: FileText,
@@ -58,7 +59,7 @@ export function ContentPanel() {
     const name = newLangName.trim();
     if (!name) return;
     const match = SUGGESTED_LANGUAGES.find(sl => sl.name.toLowerCase() === name.toLowerCase());
-    addLanguage(name, match?.flag ?? '🌐', newLangLevel);
+    addLanguage(name, match?.flag ?? 'un', newLangLevel);
     setNewLangName('');
     setNewLangLevel('intermediate');
   };
@@ -296,7 +297,9 @@ export function ContentPanel() {
               <div className="space-y-2">
                 {languages.map(lang => (
                   <div key={lang.id} className="grid grid-cols-[auto_1fr_auto_auto] gap-2 items-center">
-                    <span className="text-xl w-7 text-center" title={lang.name}>{lang.flag}</span>
+                    <span className="w-7 flex justify-center shrink-0">
+                      <LanguageFlag flag={lang.flag} title={lang.name} imgClassName="w-6" spanClassName="text-xl" />
+                    </span>
                     <input
                       type="text"
                       placeholder="Language"
@@ -321,7 +324,13 @@ export function ContentPanel() {
 
                 {/* Add new language */}
                 <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-xl w-7 text-center">{(typedMatch && newLangName.trim()) ? typedMatch.flag : '🌐'}</span>
+                  <span className="w-7 flex justify-center shrink-0">
+                    {(typedMatch && newLangName.trim()) ? (
+                      <LanguageFlag flag={typedMatch.flag} imgClassName="w-6" />
+                    ) : (
+                      <LanguageFlag flag="un" imgClassName="w-6" />
+                    )}
+                  </span>
                   <input
                     type="text"
                     list="language-suggestions"
@@ -364,7 +373,7 @@ export function ContentPanel() {
                           onClick={() => addLanguage(sl.name, sl.flag, 'intermediate')}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border border-gray-200 bg-white text-gray-600 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition"
                         >
-                          <span>{sl.flag}</span>
+                          <LanguageFlag flag={sl.flag} imgClassName="w-4" />
                           <span>{sl.name}</span>
                           <Plus className="w-3 h-3" />
                         </button>
