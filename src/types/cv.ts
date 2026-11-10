@@ -66,6 +66,8 @@ export interface CVData {
   sections: CustomSection[];
   pages: CVPage[];
   professionalSummary: string;
+  /** Global order of section keys: 'summary' | 'education' | 'experience' | 'skills' | 'languages' | custom section id */
+  sectionOrder: string[];
 }
 
 export interface CVSettings {
@@ -101,12 +103,7 @@ export const DEFAULT_CV_DATA: CVData = {
     website: 'diyarkrd.github.io',
   },
   education: [
-    {
-      id: '1',
-      degree: 'Bachelor of Electrical Engineering',
-      university: 'University of Technology',
-      year: '2023',
-    },
+    { id: '1', degree: 'Bachelor of Electrical Engineering', university: 'University of Technology', year: '2023' },
   ],
   experience: [
     {
@@ -124,15 +121,7 @@ export const DEFAULT_CV_DATA: CVData = {
       description: 'Assisted in power distribution design\nConducted safety inspections',
     },
   ],
-  skills: [
-    'AutoCAD',
-    'MATLAB',
-    'PLC Programming',
-    'Electrical Design',
-    'Project Management',
-    'Power Systems',
-    'Renewable Energy',
-  ],
+  skills: ['AutoCAD', 'MATLAB', 'PLC Programming', 'Electrical Design', 'Project Management', 'Power Systems', 'Renewable Energy'],
   languages: [
     { id: 'lang-1', name: 'Kurdish', level: 'native', flag: '☀️' },
     { id: 'lang-2', name: 'English', level: 'fluent', flag: '🇬🇧' },
@@ -142,6 +131,7 @@ export const DEFAULT_CV_DATA: CVData = {
   pages: [],
   professionalSummary:
     'Dedicated Electrical Engineer with 4+ years of experience in power systems design and renewable energy solutions. Proven track record in optimizing electrical systems and leading successful project teams.',
+  sectionOrder: ['summary', 'education', 'experience', 'skills', 'languages'],
 };
 
 export const DEFAULT_SETTINGS: CVSettings = {
@@ -155,11 +145,7 @@ export const DEFAULT_SETTINGS: CVSettings = {
   professionFontSize: 18,
   fontFamily: 'Inter',
   photoPosition: 'top-left',
-  photoStyle: {
-    shape: 'rounded',
-    size: 'md',
-    border: 'none',
-  },
+  photoStyle: { shape: 'rounded', size: 'md', border: 'none' },
   sectionSpacing: 24,
   pagePadding: 40,
   namePosition: 'default',
