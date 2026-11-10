@@ -42,6 +42,7 @@ export interface Language {
   id: string;
   name: string;
   level: LanguageLevel;
+  /** 2-letter ISO country code used to render the flag image (e.g. 'gb', 'iq'). */
   flag: string;
 }
 
@@ -123,9 +124,9 @@ export const DEFAULT_CV_DATA: CVData = {
   ],
   skills: ['AutoCAD', 'MATLAB', 'PLC Programming', 'Electrical Design', 'Project Management', 'Power Systems', 'Renewable Energy'],
   languages: [
-    { id: 'lang-1', name: 'Kurdish', level: 'native', flag: '☀️' },
-    { id: 'lang-2', name: 'English', level: 'fluent', flag: '🇬🇧' },
-    { id: 'lang-3', name: 'Arabic', level: 'fluent', flag: '🇸🇦' },
+    { id: 'lang-1', name: 'Kurdish', level: 'native', flag: 'iq' },
+    { id: 'lang-2', name: 'English', level: 'fluent', flag: 'gb' },
+    { id: 'lang-3', name: 'Arabic', level: 'fluent', flag: 'sa' },
   ],
   sections: [],
   pages: [],
@@ -207,38 +208,42 @@ export const LANGUAGE_LEVELS: { value: LanguageLevel; label: string; dots: numbe
   { value: 'beginner', label: 'Beginner', dots: 1 },
 ];
 
+/**
+ * Flag values are 2-letter ISO country codes (flagcdn.com), not emojis —
+ * emoji flags don't render on Windows and show as "GB"/"TR" text instead.
+ */
 export const SUGGESTED_LANGUAGES: { name: string; flag: string }[] = [
-  { name: 'English', flag: '🇬🇧' },
-  { name: 'Kurdish', flag: '☀️' },
-  { name: 'Arabic', flag: '🇸🇦' },
-  { name: 'Turkish', flag: '🇹🇷' },
-  { name: 'Persian', flag: '🇮🇷' },
-  { name: 'German', flag: '🇩🇪' },
-  { name: 'French', flag: '🇫🇷' },
-  { name: 'Spanish', flag: '🇪🇸' },
-  { name: 'Italian', flag: '🇮🇹' },
-  { name: 'Portuguese', flag: '🇵🇹' },
-  { name: 'Dutch', flag: '🇳🇱' },
-  { name: 'Swedish', flag: '🇸🇪' },
-  { name: 'Norwegian', flag: '🇳🇴' },
-  { name: 'Danish', flag: '🇩🇰' },
-  { name: 'Finnish', flag: '🇫🇮' },
-  { name: 'Polish', flag: '🇵🇱' },
-  { name: 'Russian', flag: '🇷🇺' },
-  { name: 'Ukrainian', flag: '🇺🇦' },
-  { name: 'Greek', flag: '🇬🇷' },
-  { name: 'Czech', flag: '🇨🇿' },
-  { name: 'Hungarian', flag: '🇭🇺' },
-  { name: 'Romanian', flag: '🇷🇴' },
-  { name: 'Chinese', flag: '🇨🇳' },
-  { name: 'Japanese', flag: '🇯🇵' },
-  { name: 'Korean', flag: '🇰🇷' },
-  { name: 'Hindi', flag: '🇮🇳' },
-  { name: 'Urdu', flag: '🇵🇰' },
-  { name: 'Bengali', flag: '🇧🇩' },
-  { name: 'Thai', flag: '🇹🇭' },
-  { name: 'Vietnamese', flag: '🇻🇳' },
-  { name: 'Indonesian', flag: '🇮🇩' },
-  { name: 'Malay', flag: '🇲🇾' },
-  { name: 'Swahili', flag: '🇰🇪' },
+  { name: 'English', flag: 'gb' },
+  { name: 'Kurdish', flag: 'iq' },
+  { name: 'Arabic', flag: 'sa' },
+  { name: 'Turkish', flag: 'tr' },
+  { name: 'Persian', flag: 'ir' },
+  { name: 'German', flag: 'de' },
+  { name: 'French', flag: 'fr' },
+  { name: 'Spanish', flag: 'es' },
+  { name: 'Italian', flag: 'it' },
+  { name: 'Portuguese', flag: 'pt' },
+  { name: 'Dutch', flag: 'nl' },
+  { name: 'Swedish', flag: 'se' },
+  { name: 'Norwegian', flag: 'no' },
+  { name: 'Danish', flag: 'dk' },
+  { name: 'Finnish', flag: 'fi' },
+  { name: 'Polish', flag: 'pl' },
+  { name: 'Russian', flag: 'ru' },
+  { name: 'Ukrainian', flag: 'ua' },
+  { name: 'Greek', flag: 'gr' },
+  { name: 'Czech', flag: 'cz' },
+  { name: 'Hungarian', flag: 'hu' },
+  { name: 'Romanian', flag: 'ro' },
+  { name: 'Chinese', flag: 'cn' },
+  { name: 'Japanese', flag: 'jp' },
+  { name: 'Korean', flag: 'kr' },
+  { name: 'Hindi', flag: 'in' },
+  { name: 'Urdu', flag: 'pk' },
+  { name: 'Bengali', flag: 'bd' },
+  { name: 'Thai', flag: 'th' },
+  { name: 'Vietnamese', flag: 'vn' },
+  { name: 'Indonesian', flag: 'id' },
+  { name: 'Malay', flag: 'my' },
+  { name: 'Swahili', flag: 'ke' },
 ];
