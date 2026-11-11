@@ -15,6 +15,17 @@ import type {
   PersonalInfo,
   PhotoStyle,
 } from '@/types/cv';
+import type {
+  CVData,
+  CVSettings,
+  CustomSection,
+  Education,
+  Experience,
+  LanguageLevel,
+  PersonalInfo,
+  PhotoStyle,
+  FreePosition,
+} from '@/types/cv';
 
 const STORAGE_KEY_DATA = 'cv-master-builder:data';
 const STORAGE_KEY_SETTINGS = 'cv-master-builder:settings';
@@ -71,6 +82,8 @@ interface CVContextValue {
 
   updateSetting: <K extends keyof CVSettings>(key: K, value: CVSettings[K]) => void;
   updatePhotoStyle: (patch: Partial<PhotoStyle>) => void;
+  updateFreePosition: (key: string, position: FreePosition) => void;
+  resetAllPositions: () => void;
 }
 
 const CVContext = createContext<CVContextValue | null>(null);
@@ -302,6 +315,25 @@ export function CVProvider({ children }: { children: ReactNode }) {
   const updatePhotoStyle = useCallback((patch: Partial<PhotoStyle>) => {
     setSettings(prev => ({ ...prev, photoStyle: { ...prev.photoStyle, ...patch } }));
   }, []);
+  const updateFreePosition = useCallback(
+  (key: string, position: FreePosition) => {
+    setCVDataState(prev => ({
+      ...prev,
+      freePositions: {
+        ...(prev.freePositions ?? {}),
+        [key]: position,
+      },
+    }));
+  },
+  [],
+);
+
+const resetAllPositions = useCallback(() => {
+  setCVDataState(prev => ({
+    ...prev,
+    freePositions: {},
+  }));
+}, []);
 
   const value: CVContextValue = {
     cvData,
@@ -334,6 +366,8 @@ export function CVProvider({ children }: { children: ReactNode }) {
     moveSection,
     updateSetting,
     updatePhotoStyle,
+    updateFreePosition,
+    resetAllPositions,
   };
 
   return <CVContext.Provider value={value}>{children}</CVContext.Provider>;
