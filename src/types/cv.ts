@@ -181,6 +181,18 @@ export const TEMPLATES = [
   { id: 'contact-bottom', name: 'Contact Bottom', icon: 'ArrowDown' },
   { id: 'striped', name: 'Striped Sections', icon: 'Minus' },
   { id: 'elegant', name: 'Elegant Serif', icon: 'Feather' },
+  { id: 'swiss-minimal', name: 'Swiss Minimal', icon: 'Hash' },
+  { id: 'sidebar-pro', name: 'Pro Sidebar', icon: 'PanelLeft' },
+  { id: 'midnight-executive', name: 'Midnight Executive', icon: 'Gem' },
+  { id: 'gradient-header', name: 'Gradient Header', icon: 'Sparkles' },
+  { id: 'brutalist', name: 'Brutalist', icon: 'Box' },
+  { id: 'editorial-serif', name: 'Editorial', icon: 'Newspaper' },
+  { id: 'terminal-dev', name: 'Terminal', icon: 'SquareTerminal' },
+  { id: 'academic', name: 'Academic', icon: 'GraduationCap' },
+  { id: 'soft-ui', name: 'Soft UI', icon: 'Layers' },
+  { id: 'outline-frame', name: 'Outline Frame', icon: 'Frame' },
+  { id: 'warm-elegant', name: 'Warm Elegant', icon: 'Sun' },
+  { id: 'photo-banner', name: 'Photo Banner', icon: 'IdCard' },
 ] as const;
 
 export const FONT_OPTIONS = [
