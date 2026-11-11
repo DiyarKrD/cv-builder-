@@ -3,6 +3,7 @@ import { useCV } from '@/hooks/useCV';
 import { Upload, FileText, Loader2, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { CVData } from '@/types/cv';
 
 interface ImportDialogProps {
   open: boolean;
@@ -16,7 +17,11 @@ export function ImportDialog({ open, onClose }: ImportDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [pastedText, setPastedText] = useState('');
   const [importSuccess, setImportSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isPdfFile = (file: File) =>
+    file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -31,65 +36,91 @@ export function ImportDialog({ open, onClose }: ImportDialogProps) {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file && file.type === 'application/pdf') {
+    if (file && isPdfFile(file)) {
       await parsePDF(file);
     }
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && isPdfFile(file)) {
       await parsePDF(file);
     }
+    e.target.value = '';
   };
 
   const parsePDF = async (file: File) => {
     setIsLoading(true);
+    setErrorMsg('');
     try {
       const pdfjs = await import('pdfjs-dist');
-      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
-      
+
+      // FIX: use the worker bundled with the SAME pdfjs-dist version as the
+      // library. The old code loaded a pdf.js 3.11.174 worker from a CDN
+      // while the installed library is v5 — the version mismatch made
+      // getDocument() fail with "Could not parse PDF" every time.
+      try {
+        const workerUrl = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default;
+        pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+      } catch {
+        // Fallback: CDN worker matching the installed library version
+        pdfjs.GlobalWorkerOptions.workerSrc =
+          `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+      }
+
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-      
+      const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+
       let fullText = '';
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
-        const pageText = content.items.map((item: any) => item.str).join(' ');
+        // Respect line breaks so section detection works on real CVs
+        const pageText = (content.items as { str?: string; hasEOL?: boolean }[])
+          .map(item => (item.str ?? '') + (item.hasEOL ? '\n' : ' '))
+          .join('');
         fullText += pageText + '\n';
       }
 
       const parsed = extractCVDataFromText(fullText);
-      setCVData({
-        ...cvData,
-        ...parsed,
-      });
-      setImportSuccess(true);
-      setTimeout(() => {
-        setImportSuccess(false);
-        onClose();
-      }, 1500);
+      applyParsed(parsed);
     } catch (err) {
       console.error('PDF parse error:', err);
-      alert('Could not parse PDF. Try the manual paste option instead.');
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMsg(
+        msg.toLowerCase().includes('password')
+          ? 'This PDF is password-protected. Remove the password and try again, or use the manual paste option.'
+          : 'Could not parse PDF. Try the manual paste option instead.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handlePasteImport = () => {
-    if (!pastedText.trim()) return;
-    const parsed = extractCVDataFromText(pastedText);
+  const applyParsed = (parsed: Partial<CVData>) => {
+    // FIX: merge nested objects instead of replacing them — the old code
+    // wiped your uploaded photo, profession and age on every import.
     setCVData({
       ...cvData,
       ...parsed,
+      personal: { ...cvData.personal, ...(parsed.personal ?? {}), photo: cvData.personal.photo },
+      contact: { ...cvData.contact, ...(parsed.contact ?? {}) },
     });
     setImportSuccess(true);
     setTimeout(() => {
       setImportSuccess(false);
       onClose();
     }, 1500);
+  };
+
+  const handlePasteImport = () => {
+    if (!pastedText.trim()) return;
+    setIsLoading(true);
+    try {
+      applyParsed(extractCVDataFromText(pastedText));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -130,7 +161,7 @@ export function ImportDialog({ open, onClose }: ImportDialogProps) {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,application/pdf"
                   onChange={handleFileSelect}
                   className="hidden"
                 />
@@ -149,6 +180,11 @@ export function ImportDialog({ open, onClose }: ImportDialogProps) {
                   </>
                 )}
               </div>
+              {errorMsg && (
+                <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                  {errorMsg}
+                </p>
+              )}
             </TabsContent>
 
             <TabsContent value="paste" className="mt-4">
@@ -156,7 +192,7 @@ export function ImportDialog({ open, onClose }: ImportDialogProps) {
                 <textarea
                   value={pastedText}
                   onChange={e => setPastedText(e.target.value)}
-                  placeholder="Paste your CV content here...&#10;We'll automatically detect sections like Education, Experience, Skills, etc."
+                  placeholder={"Paste your CV content here...\nWe'll automatically detect sections like Education, Experience, Skills, etc."}
                   rows={10}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
                 />
