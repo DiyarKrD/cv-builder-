@@ -1,351 +1,464 @@
-import { useState, useRef } from 'react';
+
+import { useRef, useState } from 'react';
+import type { ChangeEvent, DragEvent } from 'react';
 import { useCV } from '@/hooks/useCV';
 import { Upload, FileText, Loader2, Check } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+
 import type { CVData } from '@/types/cv';
 
 interface ImportDialogProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function ImportDialog({ open, onClose }: ImportDialogProps) {
-  const { setCVData, cvData } = useCV();
-  const [activeTab, setActiveTab] = useState('pdf');
-  const [isDragging, setIsDragging] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [pastedText, setPastedText] = useState('');
-  const [importSuccess, setImportSuccess] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+type ImportStatus = 'idle' | 'loading' | 'success' | 'error';
+
+type ParsedCV = Partial<CVData>;
+
+export function ImportDialog({
+  open,
+  onOpenChange,
+}: ImportDialogProps) {
+  const { cvData, setCVData } = useCV();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isPdfFile = (file: File) =>
-    file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  const [status, setStatus] = useState<ImportStatus>('idle');
+  const [error, setError] = useState('');
+  const [dragging, setDragging] = useState(false);
+  const [fileName, setFileName] = useState('');
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
+  const resetState = () => {
+    setStatus('idle');
+    setError('');
+    setFileName('');
+    setDragging(false);
   };
 
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file && isPdfFile(file)) {
-      await parsePDF(file);
+  const handleClose = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      resetState();
     }
+
+    onOpenChange(nextOpen);
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && isPdfFile(file)) {
-      await parsePDF(file);
-    }
-    e.target.value = '';
-  };
-
-  const parsePDF = async (file: File) => {
-    setIsLoading(true);
-    setErrorMsg('');
-    try {
-      const pdfjs = await import('pdfjs-dist');
-
-      // FIX: use the worker bundled with the SAME pdfjs-dist version as the
-      // library. The old code loaded a pdf.js 3.11.174 worker from a CDN
-      // while the installed library is v5 — the version mismatch made
-      // getDocument() fail with "Could not parse PDF" every time.
-      try {
-        const workerUrl = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default;
-        pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
-      } catch {
-        // Fallback: CDN worker matching the installed library version
-        pdfjs.GlobalWorkerOptions.workerSrc =
-          `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-      }
-
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-
-      let fullText = '';
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        // Respect line breaks so section detection works on real CVs
-        const pageText = (content.items as { str?: string; hasEOL?: boolean }[])
-          .map(item => (item.str ?? '') + (item.hasEOL ? '\n' : ' '))
-          .join('');
-        fullText += pageText + '\n';
-      }
-
-      const parsed = extractCVDataFromText(fullText);
-      applyParsed(parsed);
-    } catch (err) {
-      console.error('PDF parse error:', err);
-      const msg = err instanceof Error ? err.message : String(err);
-      setErrorMsg(
-        msg.toLowerCase().includes('password')
-          ? 'This PDF is password-protected. Remove the password and try again, or use the manual paste option.'
-          : 'Could not parse PDF. Try the manual paste option instead.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const applyParsed = (parsed: Partial<CVData>) => {
-    // FIX: merge nested objects instead of replacing them — the old code
-    // wiped your uploaded photo, profession and age on every import.
+  const applyParsed = (parsed: ParsedCV) => {
     setCVData({
       ...cvData,
       ...parsed,
-      personal: { ...cvData.personal, ...(parsed.personal ?? {}), photo: cvData.personal.photo },
-      contact: { ...cvData.contact, ...(parsed.contact ?? {}) },
+
+      personal: {
+        ...(cvData.personal ?? {}),
+        ...(parsed.personal ?? {}),
+        photo: cvData.personal?.photo ?? '',
+      },
+
+      contact: {
+        ...(cvData.contact ?? {}),
+        ...(parsed.contact ?? {}),
+      },
+
+      education: parsed.education ?? cvData.education,
+      experience: parsed.experience ?? cvData.experience,
+      skills: parsed.skills ?? cvData.skills,
+
+      professionalSummary:
+        parsed.professionalSummary ?? cvData.professionalSummary,
+
+      sections: parsed.sections ?? cvData.sections,
     });
-    setImportSuccess(true);
-    setTimeout(() => {
-      setImportSuccess(false);
-      onClose();
-    }, 1500);
+
+    setStatus('success');
   };
 
-  const handlePasteImport = () => {
-    if (!pastedText.trim()) return;
-    setIsLoading(true);
+  const extractCVDataFromText = (text: string): ParsedCV => {
+    const lines = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    const fullText = lines.join('\n');
+
+    const email =
+      fullText.match(
+        /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
+      )?.[0] ?? '';
+
+    const phone =
+      fullText.match(
+        /(?:\+?\d[\d\s().-]{7,}\d)/,
+      )?.[0]?.trim() ?? '';
+
+    const name = lines.find((line) => {
+      const hasLetters = /[a-zA-Z]/.test(line);
+      const isNotEmail = !line.includes('@');
+      const isNotPhone = !/^\+?[\d\s().-]+$/.test(line);
+      const isShort = line.length <= 60;
+
+      return hasLetters && isNotEmail && isNotPhone && isShort;
+    }) ?? '';
+
+    const skillsHeading = /^(skills|technical skills|core competencies)$/i;
+    const educationHeading = /^(education|academic background)$/i;
+    const experienceHeading =
+      /^(experience|work experience|employment history|professional experience)$/i;
+    const summaryHeading =
+      /^(summary|professional summary|profile|objective)$/i;
+
+    const getSection = (
+      headingPattern: RegExp,
+    ): string[] => {
+      const headingIndex = lines.findIndex((line) =>
+        headingPattern.test(line),
+      );
+
+      if (headingIndex === -1) return [];
+
+      const nextHeading = lines.findIndex(
+        (line, index) =>
+          index > headingIndex &&
+          (
+            skillsHeading.test(line) ||
+            educationHeading.test(line) ||
+            experienceHeading.test(line) ||
+            summaryHeading.test(line)
+          ),
+      );
+
+      const endIndex =
+        nextHeading === -1 ? lines.length : nextHeading;
+
+      return lines.slice(headingIndex + 1, endIndex);
+    };
+
+    const skills = getSection(skillsHeading)
+      .join(' ')
+      .split(/[,;•|]/)
+      .map((skill) => skill.trim())
+      .filter(Boolean);
+
+    const education = getSection(educationHeading).join('\n');
+    const experience = getSection(experienceHeading).join('\n');
+    const summary = getSection(summaryHeading).join(' ');
+
+    const location =
+      lines.find((line) =>
+        /\b(city|country|iraq|erbil|kurdistan)\b/i.test(line),
+      ) ?? '';
+
+    return {
+      personal: {
+        ...(cvData.personal ?? {}),
+        name,
+      },
+
+      contact: {
+        ...(cvData.contact ?? {}),
+        email,
+        phone,
+        location,
+      },
+
+      skills:
+        skills.length > 0
+          ? skills.map((skill) => ({
+              name: skill,
+            })) as CVData['skills']
+          : undefined,
+
+      professionalSummary: summary || undefined,
+
+      education:
+        education.length > 0
+          ? [{ description: education } as CVData['education'][number]]
+          : undefined,
+
+      experience:
+        experience.length > 0
+          ? [{ description: experience } as CVData['experience'][number]]
+          : undefined,
+    };
+  };
+
+  const parsePDF = async (file: File): Promise<string> => {
+    const pdfjs = await import('pdfjs-dist');
+
     try {
-      applyParsed(extractCVDataFromText(pastedText));
-    } finally {
-      setIsLoading(false);
+      const workerUrl = await import(
+        'pdfjs-dist/build/pdf.worker.min.mjs?url'
+      );
+
+      pdfjs.GlobalWorkerOptions.workerSrc = workerUrl.default;
+    } catch {
+      // Fallback for environments where Vite cannot resolve the worker URL.
+      pdfjs.GlobalWorkerOptions.workerSrc =
+        `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
     }
+
+    const buffer = await file.arrayBuffer();
+
+    const pdf = await pdfjs.getDocument({
+      data: new Uint8Array(buffer),
+    }).promise;
+
+    const pages: string[] = [];
+
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber);
+      const content = await page.getTextContent();
+
+      const pageText = content.items
+        .map((item) => {
+          if ('str' in item) return item.str;
+          return '';
+        })
+        .join(' ');
+
+      pages.push(pageText);
+    }
+
+    return pages.join('\n');
+  };
+
+  const processFile = async (file: File) => {
+    resetState();
+
+    if (!file) return;
+
+    const isPDF =
+      file.type === 'application/pdf' ||
+      file.name.toLowerCase().endsWith('.pdf');
+
+    const isText =
+      file.type === 'text/plain' ||
+      file.name.toLowerCase().endsWith('.txt');
+
+    if (!isPDF && !isText) {
+      setStatus('error');
+      setError('Please upload a PDF or TXT file.');
+      return;
+    }
+
+    setFileName(file.name);
+    setStatus('loading');
+
+    try {
+      let extractedText = '';
+
+      if (isPDF) {
+        extractedText = await parsePDF(file);
+      } else {
+        extractedText = await file.text();
+      }
+
+      if (!extractedText.trim()) {
+        throw new Error(
+          'No readable text was found. Your PDF may contain scanned images.',
+        );
+      }
+
+      const parsedData = extractCVDataFromText(extractedText);
+
+      applyParsed(parsedData);
+    } catch (err) {
+      console.error('CV import failed:', err);
+
+      setStatus('error');
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Something went wrong while importing your CV.',
+      );
+    }
+  };
+
+  const handleFileChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      void processFile(file);
+    }
+
+    // Allows selecting the same file again.
+    event.target.value = '';
+  };
+
+  const handleDrop = (
+    event: DragEvent<HTMLDivElement>,
+  ) => {
+    event.preventDefault();
+    setDragging(false);
+
+    const file = event.dataTransfer.files?.[0];
+
+    if (file) {
+      void processFile(file);
+    }
+  };
+
+  const handleDragOver = (
+    event: DragEvent<HTMLDivElement>,
+  ) => {
+    event.preventDefault();
+    setDragging(true);
+  };
+
+  const handleDragLeave = (
+    event: DragEvent<HTMLDivElement>,
+  ) => {
+    event.preventDefault();
+    setDragging(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Upload className="w-5 h-5" /> Import Existing CV
+            <FileText className="h-5 w-5" />
+            Import your CV
           </DialogTitle>
         </DialogHeader>
 
-        {importSuccess ? (
-          <div className="py-12 flex flex-col items-center gap-3">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <Check className="w-8 h-8 text-green-600" />
-            </div>
-            <p className="text-lg font-semibold text-gray-800">CV Imported Successfully!</p>
-          </div>
-        ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="pdf">Upload PDF</TabsTrigger>
-              <TabsTrigger value="paste">Paste Text</TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="upload" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="upload">
+              Upload File
+            </TabsTrigger>
 
-            <TabsContent value="pdf" className="mt-4">
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
-                  isDragging
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 hover:border-gray-400 bg-gray-50'
-                }`}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,application/pdf"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                {isLoading ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
-                    <p className="text-sm text-gray-600">Parsing PDF...</p>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-700 mb-1">
-                      Drop your CV PDF here, or click to browse
-                    </p>
-                    <p className="text-xs text-gray-500">Supports PDF files only</p>
-                  </>
-                )}
-              </div>
-              {errorMsg && (
-                <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-                  {errorMsg}
-                </p>
+            <TabsTrigger value="instructions">
+              Instructions
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="upload" className="space-y-4 pt-4">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.txt,application/pdf,text/plain"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => fileInputRef.current?.click()}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(event) => {
+                if (
+                  event.key === 'Enter' ||
+                  event.key === ' '
+                ) {
+                  event.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              className={`
+                flex min-h-[190px] cursor-pointer flex-col
+                items-center justify-center rounded-xl border-2
+                border-dashed p-6 text-center transition-colors
+                ${
+                  dragging
+                    ? 'border-primary bg-primary/10'
+                    : 'border-muted-foreground/30 hover:border-primary'
+                }
+              `}
+            >
+              {status === 'loading' ? (
+                <>
+                  <Loader2 className="mb-3 h-10 w-10 animate-spin text-primary" />
+                  <p className="font-medium">
+                    Processing your CV...
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {fileName}
+                  </p>
+                </>
+              ) : status === 'success' ? (
+                <>
+                  <Check className="mb-3 h-10 w-10 text-green-500" />
+                  <p className="font-medium">
+                    CV imported successfully!
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Your extracted information has been added.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Upload className="mb-3 h-10 w-10 text-muted-foreground" />
+                  <p className="font-medium">
+                    Drop your CV here or click to browse
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Supports PDF and TXT files
+                  </p>
+                </>
               )}
-            </TabsContent>
+            </div>
 
-            <TabsContent value="paste" className="mt-4">
-              <div className="space-y-3">
-                <textarea
-                  value={pastedText}
-                  onChange={e => setPastedText(e.target.value)}
-                  placeholder={"Paste your CV content here...\nWe'll automatically detect sections like Education, Experience, Skills, etc."}
-                  rows={10}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
-                />
-                <button
-                  onClick={handlePasteImport}
-                  disabled={!pastedText.trim() || isLoading}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-                  Parse and Import
-                </button>
+            {status === 'error' && (
+              <div
+                role="alert"
+                className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+              >
+                {error}
               </div>
-            </TabsContent>
-          </Tabs>
-        )}
+            )}
+
+            {status === 'success' && (
+              <button
+                type="button"
+                onClick={() => handleClose(false)}
+                className="w-full rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:opacity-90"
+              >
+                Done
+              </button>
+            )}
+          </TabsContent>
+
+          <TabsContent value="instructions" className="pt-4">
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                Upload an existing CV to extract information
+                and populate your CV builder.
+              </p>
+
+              <p>
+                For best results, use a text-based PDF rather
+                than a scanned document.
+              </p>
+
+              <p>
+                After importing, review your details and
+                correct any information that was not extracted
+                accurately.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
-}
-
-function extractCVDataFromText(text: string): Partial<import('@/types/cv').CVData> {
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-
-  // Extract name (first non-empty line that's not a section header)
-  const sectionKeywords = ['education', 'experience', 'skills', 'contact', 'summary', 'objective', 'projects', 'languages', 'certifications', 'awards', 'references'];
-  let name = '';
-  for (const line of lines) {
-    const lower = line.toLowerCase();
-    if (line.length > 2 && line.length < 60 && !sectionKeywords.some(k => lower.includes(k))) {
-      name = line;
-      break;
-    }
-  }
-
-  // Extract email
-  const emailMatch = text.match(/[\w.-]+@[\w.-]+\.\w+/);
-  const email = emailMatch ? emailMatch[0] : '';
-
-  // Extract phone
-  const phoneMatch = text.match(/[\+]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,4}[-\s.]?[0-9]{1,9}/);
-  const phone = phoneMatch ? phoneMatch[0] : '';
-
-  // Extract sections
-  const sections: import('@/types/cv').CustomSection[] = [];
-
-  // Find education section
-  const education: import('@/types/cv').Education[] = [];
-  const eduStart = findSectionIndex(lines, ['education', 'academic', 'degree', 'university', 'college']);
-  if (eduStart >= 0) {
-    for (let i = eduStart + 1; i < lines.length && !isSectionHeader(lines[i]); i++) {
-      const line = lines[i];
-      if (line.length > 5 && !line.includes('@') && !line.match(/^\d{4}$/)) {
-        const yearMatch = line.match(/\b(19|20)\d{2}\b/);
-        education.push({
-          id: `edu-${i}`,
-          degree: line,
-          university: lines[i + 1] && !isSectionHeader(lines[i + 1]) ? lines[i + 1] : '',
-          year: yearMatch ? yearMatch[0] : '',
-        });
-        if (lines[i + 1] && !isSectionHeader(lines[i + 1])) i++;
-      }
-    }
-  }
-
-  // Find experience section
-  const experience: import('@/types/cv').Experience[] = [];
-  const expStart = findSectionIndex(lines, ['experience', 'work', 'employment', 'career', 'professional']);
-  if (expStart >= 0) {
-    let currentExp: import('@/types/cv').Experience | null = null;
-    for (let i = expStart + 1; i < lines.length && !isSectionHeader(lines[i]); i++) {
-      const line = lines[i];
-      if (line.length > 5) {
-        if (!currentExp || line.match(/^(19|20)\d{2}/) || line.match(/\b(19|20)\d{2}\b.*\b(19|20)\d{2}\b/)) {
-          if (currentExp) experience.push(currentExp);
-          const parts = line.split(/[|,]/).map(p => p.trim());
-          currentExp = {
-            id: `exp-${i}`,
-            title: parts[0] || line,
-            company: parts[1] || '',
-            period: line.match(/\b(19|20)\d{2}\b.*?\b(19|20)\d{2}\b|present|current/i)?.[0] || '',
-            description: '',
-          };
-        } else if (currentExp) {
-          currentExp.description += (currentExp.description ? '\n' : '') + line;
-        }
-      }
-    }
-    if (currentExp) experience.push(currentExp);
-  }
-
-  // Find skills
-  let skills: string[] = [];
-  const skillsStart = findSectionIndex(lines, ['skills', 'expertise', 'competencies', 'technologies']);
-  if (skillsStart >= 0) {
-    const skillsText = lines.slice(skillsStart + 1, skillsStart + 5).join(' ');
-    skills = skillsText.split(/[,;|]/).map(s => s.trim()).filter(s => s.length > 1 && s.length < 30);
-    if (skills.length === 0) {
-      // Try bullet points
-      for (let i = skillsStart + 1; i < lines.length && !isSectionHeader(lines[i]); i++) {
-        const clean = lines[i].replace(/^[•\-\*]\s*/, '').trim();
-        if (clean.length > 1 && clean.length < 30) skills.push(clean);
-      }
-    }
-  }
-
-  // Professional summary
-  let professionalSummary = '';
-  const summaryStart = findSectionIndex(lines, ['summary', 'objective', 'profile', 'about']);
-  if (summaryStart >= 0) {
-    const summaryLines: string[] = [];
-    for (let i = summaryStart + 1; i < lines.length && !isSectionHeader(lines[i]) && summaryLines.length < 5; i++) {
-      if (lines[i].length > 10) summaryLines.push(lines[i]);
-    }
-    professionalSummary = summaryLines.join(' ');
-  }
-
-  // Extract location
-  const locationMatch = text.match(/\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?,\s*(?:[A-Z][a-z]+|[A-Z]{2}))\b/);
-  const location = locationMatch ? locationMatch[0] : '';
-
-  return {
-    personal: {
-      fullName: name,
-      profession: '',
-      age: '',
-      photo: null,
-    },
-    contact: {
-      email,
-      phone,
-      location,
-      website: '',
-    },
-    education: education.slice(0, 5),
-    experience: experience.slice(0, 8),
-    skills: skills.slice(0, 20),
-    professionalSummary,
-    sections,
-  };
-}
-
-function findSectionIndex(lines: string[], keywords: string[]): number {
-  for (let i = 0; i < lines.length; i++) {
-    const lower = lines[i].toLowerCase();
-    if (keywords.some(k => lower.includes(k)) && lines[i].length < 40) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-function isSectionHeader(line: string): boolean {
-  const keywords = ['education', 'experience', 'skills', 'contact', 'summary', 'objective', 'projects', 'languages', 'certifications', 'awards', 'references', 'hobbies', 'interests'];
-  const lower = line.toLowerCase().replace(/[:\s]/g, '');
-  return keywords.some(k => lower === k || lower === k + 's');
 }
