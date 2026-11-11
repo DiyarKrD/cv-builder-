@@ -158,42 +158,98 @@ export const DEFAULT_SETTINGS: CVSettings = {
   layout: 'default',
 };
 
-export const TEMPLATES = [
-  { id: 'modern-minimalist', name: 'Modern Minimalist', icon: 'Minimize2' },
-  { id: 'classic-pro', name: 'Classic Professional', icon: 'Briefcase' },
-  { id: 'creative-sidebar', name: 'Creative Sidebar', icon: 'Layout' },
-  { id: 'two-column-tech', name: 'Two Column Tech', icon: 'Columns' },
-  { id: 'executive', name: 'Executive Header', icon: 'Crown' },
-  { id: 'timeline', name: 'Timeline Vertical', icon: 'Clock' },
-  { id: 'cards', name: 'Card Based', icon: 'Grid3x3' },
-  { id: 'dark-pro', name: 'Dark Mode Pro', icon: 'Moon' },
-  { id: 'colorful', name: 'Colorful Vibrant', icon: 'Palette' },
-  { id: 'grid', name: 'Grid Layout', icon: 'Table' },
-  { id: 'centered', name: 'Centered Focus', icon: 'AlignCenter' },
-  { id: 'left-heavy', name: 'Left Heavy', icon: 'AlignLeft' },
-  { id: 'right-heavy', name: 'Right Heavy', icon: 'AlignRight' },
-  { id: 'compact', name: 'Compact Single Page', icon: 'FileText' },
-  { id: 'magazine', name: 'Magazine Style', icon: 'BookOpen' },
-  { id: 'infographic', name: 'Infographic Heavy', icon: 'BarChart3' },
-  { id: 'minimal-text', name: 'Minimal Text', icon: 'Type' },
-  { id: 'bold-type', name: 'Bold Typography', icon: 'Bold' },
-  { id: 'photo-focus', name: 'Photo Focus', icon: 'Camera' },
-  { id: 'contact-bottom', name: 'Contact Bottom', icon: 'ArrowDown' },
-  { id: 'striped', name: 'Striped Sections', icon: 'Minus' },
-  { id: 'elegant', name: 'Elegant Serif', icon: 'Feather' },
-  { id: 'swiss-minimal', name: 'Swiss Minimal', icon: 'Hash' },
-  { id: 'sidebar-pro', name: 'Pro Sidebar', icon: 'PanelLeft' },
-  { id: 'midnight-executive', name: 'Midnight Executive', icon: 'Gem' },
-  { id: 'gradient-header', name: 'Gradient Header', icon: 'Sparkles' },
-  { id: 'brutalist', name: 'Brutalist', icon: 'Box' },
-  { id: 'editorial-serif', name: 'Editorial', icon: 'Newspaper' },
-  { id: 'terminal-dev', name: 'Terminal', icon: 'SquareTerminal' },
-  { id: 'academic', name: 'Academic', icon: 'GraduationCap' },
-  { id: 'soft-ui', name: 'Soft UI', icon: 'Layers' },
-  { id: 'outline-frame', name: 'Outline Frame', icon: 'Frame' },
-  { id: 'warm-elegant', name: 'Warm Elegant', icon: 'Sun' },
-  { id: 'photo-banner', name: 'Photo Banner', icon: 'IdCard' },
-] as const;
+/* ------------------------------------------------------------------ */
+/*  Templates — 46 total, grouped into tabbed categories.              */
+/*  Every template ships with a default primary/secondary palette.     */
+/*  Selecting a template in the panel applies its palette to           */
+/*  settings.primaryColor / secondaryColor, which CVPreview exposes    */
+/*  as the CSS variables --accent and --accent2.                       */
+/*                                                                     */
+/*  Design languages are original CSS implementations inspired by      */
+/*  openly-licensed template ecosystems (Reactive Resume — MIT,        */
+/*  JSON Resume themes — MIT). Only visual patterns were taken,        */
+/*  no code and no personal data.                                      */
+/* ------------------------------------------------------------------ */
+
+export type TemplateCategory = 'minimal' | 'professional' | 'creative' | 'bold' | 'dark';
+
+export interface TemplateDef {
+  id: string;
+  name: string;
+  icon: string;
+  category: TemplateCategory;
+  /** Default palette applied when the template is selected. */
+  colors: { primary: string; secondary: string };
+  /** True for templates with a dark page background. */
+  dark?: boolean;
+}
+
+export const TEMPLATE_CATEGORIES: { id: TemplateCategory | 'all'; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'minimal', label: 'Minimal' },
+  { id: 'professional', label: 'Professional' },
+  { id: 'creative', label: 'Creative' },
+  { id: 'bold', label: 'Bold' },
+  { id: 'dark', label: 'Dark' },
+];
+
+export const TEMPLATES: TemplateDef[] = [
+  /* ---------- Minimal ---------- */
+  { id: 'modern-minimalist', name: 'Modern Minimalist', icon: 'Minimize2', category: 'minimal', colors: { primary: '#3b82f6', secondary: '#1e40af' } },
+  { id: 'minimal-text', name: 'Minimal Text', icon: 'Type', category: 'minimal', colors: { primary: '#111827', secondary: '#6b7280' } },
+  { id: 'swiss-minimal', name: 'Swiss Minimal', icon: 'Hash', category: 'minimal', colors: { primary: '#111111', secondary: '#3b82f6' } },
+  { id: 'compact', name: 'Compact Single Page', icon: 'FileText', category: 'minimal', colors: { primary: '#3b82f6', secondary: '#1e40af' } },
+  { id: 'centered', name: 'Centered Focus', icon: 'AlignCenter', category: 'minimal', colors: { primary: '#3b82f6', secondary: '#8b5cf6' } },
+  { id: 'outline-frame', name: 'Outline Frame', icon: 'Frame', category: 'minimal', colors: { primary: '#111111', secondary: '#3b82f6' } },
+  { id: 'left-heavy', name: 'Left Heavy', icon: 'AlignLeft', category: 'minimal', colors: { primary: '#3b82f6', secondary: '#93c5fd' } },
+  { id: 'right-heavy', name: 'Right Heavy', icon: 'AlignRight', category: 'minimal', colors: { primary: '#3b82f6', secondary: '#93c5fd' } },
+
+  /* ---------- Professional ---------- */
+  { id: 'classic-pro', name: 'Classic Professional', icon: 'Briefcase', category: 'professional', colors: { primary: '#1e40af', secondary: '#3b82f6' } },
+  { id: 'executive', name: 'Executive Header', icon: 'Crown', category: 'professional', colors: { primary: '#1e293b', secondary: '#d4af37' } },
+  { id: 'two-column-tech', name: 'Two Column Tech', icon: 'Columns', category: 'professional', colors: { primary: '#0891b2', secondary: '#164e63' } },
+  { id: 'magazine', name: 'Magazine Style', icon: 'BookOpen', category: 'professional', colors: { primary: '#111827', secondary: '#dc2626' } },
+  { id: 'academic', name: 'Academic', icon: 'GraduationCap', category: 'professional', colors: { primary: '#111111', secondary: '#3b82f6' } },
+  { id: 'elegant', name: 'Elegant Serif', icon: 'Feather', category: 'professional', colors: { primary: '#1c1917', secondary: '#9a3412' } },
+  { id: 'warm-elegant', name: 'Warm Elegant', icon: 'Sun', category: 'professional', colors: { primary: '#96733f', secondary: '#d8c9ac' } },
+  { id: 'editorial-serif', name: 'Editorial', icon: 'Newspaper', category: 'professional', colors: { primary: '#9a3412', secondary: '#1c1917' } },
+  { id: 'grid', name: 'Grid Layout', icon: 'Table', category: 'professional', colors: { primary: '#0f766e', secondary: '#115e59' } },
+  { id: 'contact-bottom', name: 'Contact Bottom', icon: 'ArrowDown', category: 'professional', colors: { primary: '#0f4c81', secondary: '#3b82f6' } },
+  { id: 'sidebar-pro', name: 'Pro Sidebar', icon: 'PanelLeft', category: 'professional', colors: { primary: '#0f4c81', secondary: '#3b82f6' } },
+  { id: 'corporate-navy', name: 'Corporate Navy', icon: 'Building2', category: 'professional', colors: { primary: '#1e40af', secondary: '#64748b' } },
+
+  /* ---------- Creative ---------- */
+  { id: 'creative-sidebar', name: 'Creative Sidebar', icon: 'Layout', category: 'creative', colors: { primary: '#7c3aed', secondary: '#ec4899' } },
+  { id: 'timeline', name: 'Timeline Vertical', icon: 'Clock', category: 'creative', colors: { primary: '#3b82f6', secondary: '#8b5cf6' } },
+  { id: 'infographic', name: 'Infographic Heavy', icon: 'BarChart3', category: 'creative', colors: { primary: '#f97316', secondary: '#0ea5e9' } },
+  { id: 'photo-focus', name: 'Photo Focus', icon: 'Camera', category: 'creative', colors: { primary: '#3b82f6', secondary: '#1e40af' } },
+  { id: 'photo-banner', name: 'Photo Banner', icon: 'IdCard', category: 'creative', colors: { primary: '#0ea5e9', secondary: '#6366f1' } },
+  { id: 'colorful', name: 'Colorful Vibrant', icon: 'Palette', category: 'creative', colors: { primary: '#667eea', secondary: '#764ba2' } },
+  { id: 'gradient-header', name: 'Gradient Header', icon: 'Sparkles', category: 'creative', colors: { primary: '#6366f1', secondary: '#d946ef' } },
+  { id: 'soft-ui', name: 'Soft UI', icon: 'Layers', category: 'creative', colors: { primary: '#3b82f6', secondary: '#8b5cf6' } },
+  { id: 'cards', name: 'Card Based', icon: 'Grid3x3', category: 'creative', colors: { primary: '#3b82f6', secondary: '#10b981' } },
+  { id: 'striped', name: 'Striped Sections', icon: 'Minus', category: 'creative', colors: { primary: '#3b82f6', secondary: '#8b5cf6' } },
+  { id: 'glassmorphism', name: 'Glassmorphism', icon: 'Droplets', category: 'creative', colors: { primary: '#6366f1', secondary: '#ec4899' } },
+  { id: 'bento-grid', name: 'Bento Grid', icon: 'LayoutGrid', category: 'creative', colors: { primary: '#0ea5e9', secondary: '#f59e0b' }, dark: true },
+  { id: 'duotone-split', name: 'Duotone Split', icon: 'Split', category: 'creative', colors: { primary: '#1e3a8a', secondary: '#3b82f6' } },
+  { id: 'gradient-mesh', name: 'Gradient Mesh', icon: 'Rainbow', category: 'creative', colors: { primary: '#8b5cf6', secondary: '#06b6d4' } },
+  { id: 'paper-layer', name: 'Paper Layer', icon: 'Files', category: 'creative', colors: { primary: '#d97706', secondary: '#92400e' } },
+  { id: 'nature-organic', name: 'Nature Organic', icon: 'Leaf', category: 'creative', colors: { primary: '#16a34a', secondary: '#84cc16' } },
+  { id: 'art-deco', name: 'Art Deco', icon: 'Landmark', category: 'creative', colors: { primary: '#b8860b', secondary: '#1c1917' } },
+
+  /* ---------- Bold ---------- */
+  { id: 'bold-type', name: 'Bold Typography', icon: 'Bold', category: 'bold', colors: { primary: '#111111', secondary: '#ff3b30' } },
+  { id: 'brutalist', name: 'Brutalist', icon: 'Box', category: 'bold', colors: { primary: '#ffe600', secondary: '#111111' } },
+  { id: 'neo-brutal', name: 'Neo Brutalism', icon: 'Zap', category: 'bold', colors: { primary: '#ffe600', secondary: '#ff4d8d' } },
+  { id: 'stripes-playful', name: 'Stripes Playful', icon: 'PartyPopper', category: 'bold', colors: { primary: '#f97316', secondary: '#14b8a6' } },
+  { id: 'big-type', name: 'Big Type Poster', icon: 'Heading1', category: 'bold', colors: { primary: '#111111', secondary: '#3b82f6' } },
+
+  /* ---------- Dark ---------- */
+  { id: 'dark-pro', name: 'Dark Mode Pro', icon: 'Moon', category: 'dark', colors: { primary: '#3b82f6', secondary: '#8b5cf6' }, dark: true },
+  { id: 'midnight-executive', name: 'Midnight Executive', icon: 'Gem', category: 'dark', colors: { primary: '#d4af37', secondary: '#0b1220' }, dark: true },
+  { id: 'terminal-dev', name: 'Terminal', icon: 'SquareTerminal', category: 'dark', colors: { primary: '#7ee787', secondary: '#58a6ff' }, dark: true },
+  { id: 'neo-tokyo', name: 'Neo Tokyo', icon: 'MoonStar', category: 'dark', colors: { primary: '#22d3ee', secondary: '#f471b5' }, dark: true },
+];
 
 export const FONT_OPTIONS = [
   { value: 'Inter', label: 'Inter (Modern)' },
