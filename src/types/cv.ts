@@ -93,7 +93,10 @@ export interface CVSettings {
   contactPosition: string;
   layout: string;
 }
-
+export interface FreePosition {
+  x: number;
+  y: number;
+}
 export const DEFAULT_CV_DATA: CVData = {
   personal: {
     fullName: 'Diyar KRD',
@@ -137,6 +140,8 @@ export const DEFAULT_CV_DATA: CVData = {
   professionalSummary:
     'Dedicated Electrical Engineer with 4+ years of experience in power systems design and renewable energy solutions. Proven track record in optimizing electrical systems and leading successful project teams.',
   sectionOrder: ['photo', 'summary', 'education', 'experience', 'skills', 'languages'],
+  freePositions: Record<string, FreePosition>;
+  freePositions: {},
 };
 
 export const DEFAULT_SETTINGS: CVSettings = {
@@ -156,6 +161,8 @@ export const DEFAULT_SETTINGS: CVSettings = {
   namePosition: 'default',
   contactPosition: 'below-header',
   layout: 'default',
+  moveMode: 'sequence' | 'free';
+  moveMode: 'sequence',
 };
 
 /* ------------------------------------------------------------------ */
