@@ -169,9 +169,10 @@ export function CVPreview() {
               style={{
                 background: settings.cvBackgroundColor,
                 padding: `${settings.pagePadding}px`,
+                '--accent': settings.primaryColor,
                 transform: `scale(${scale})`,
                 transformOrigin: 'top left',
-              }}
+              } as React.CSSProperties}
             >
               <div className="cv-content h-full" style={{ display: 'flex', flexDirection: 'column' }}>
                 {pageIdx === 0 && <PageHeader />}
@@ -208,7 +209,11 @@ export function CVPreview() {
 /* ------------------------------------------------------------------ */
 function PageHeader() {
   const { cvData, settings, updatePersonal, updateContact } = useCV();
-  const isDark = settings.template === 'dark-pro' || settings.template === 'executive';
+  const isDark =
+    settings.template === 'dark-pro' ||
+    settings.template === 'executive' ||
+    settings.template === 'midnight-executive' ||
+    settings.template === 'terminal-dev';
 
   const nameColor = isDark ? '#ffffff' : settings.nameColor;
   const profColor = isDark ? '#cbd5e1' : settings.professionColor;
@@ -308,7 +313,10 @@ function SectionTitle({ title, onCommit }: { title: string; onCommit?: (t: strin
 
 function SectionContent({ sectionKey, isCards }: { sectionKey: string; isCards: boolean }) {
   const { cvData, settings } = useCV();
-  const isDark = settings.template === 'dark-pro';
+  const isDark =
+    settings.template === 'dark-pro' ||
+    settings.template === 'midnight-executive' ||
+    settings.template === 'terminal-dev';
 
   if (sectionKey === 'photo') return <PhotoSection />;
   if (sectionKey === 'summary') {
