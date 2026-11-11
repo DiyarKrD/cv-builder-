@@ -283,3 +283,223 @@ input[type="range"]::-webkit-slider-thumb {
   }
   .editable:empty::before { content: none !important; }
 }
+
+/* ==================================================================
+   BATCH 2 — New Templates (add to the END of src/App.css)
+   These 12 templates are original designs inspired by popular
+   open-source CV design languages. They use the --accent CSS
+   variable, which CVPreview sets from settings.primaryColor, so
+   they follow the user's chosen primary color automatically.
+   ================================================================== */
+
+/* ---------- 23. Swiss Minimal ---------- */
+.template-swiss-minimal { background: #ffffff; }
+.template-swiss-minimal .cv-header { border-bottom: 3px solid #111111; padding-bottom: 14px; }
+.template-swiss-minimal .cv-name { letter-spacing: -0.02em; }
+.template-swiss-minimal .section-title {
+  border-top: 2px solid #111111 !important;
+  border-bottom: none !important;
+  padding-top: 8px;
+  font-size: 12px !important;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #111111 !important;
+}
+
+/* ---------- 24. Pro Sidebar ---------- */
+.template-sidebar-pro { background: #ffffff; border-left: 14px solid var(--accent, #0f4c81); }
+.template-sidebar-pro .cv-body { column-count: 2; column-gap: 32px; column-rule: 1px solid #e2e8f0; }
+.template-sidebar-pro .cv-block { break-inside: avoid; }
+.template-sidebar-pro .section-title { border-bottom: none !important; padding-bottom: 0; }
+
+/* ---------- 25. Midnight Executive (dark) ---------- */
+.template-midnight-executive { background: #0b1220; color: #e6e4df; }
+.template-midnight-executive .cv-header { border-bottom: 1px solid rgba(212,175,55,.45); padding-bottom: 16px; }
+.template-midnight-executive .cv-name { color: #f3efe6 !important; }
+.template-midnight-executive .cv-profession { color: #d4af37 !important; }
+.template-midnight-executive .section-title { color: #d4af37 !important; border-color: #d4af37 !important; }
+.template-midnight-executive .contact-section span { color: #b7bdc9 !important; }
+.template-midnight-executive .cv-header p { color: #b7bdc9 !important; }
+.template-midnight-executive .education-section h3,
+.template-midnight-executive .experience-section h3 { color: #f3efe6 !important; }
+.template-midnight-executive .text-gray-600,
+.template-midnight-executive .text-gray-700,
+.template-midnight-executive .text-gray-800 { color: #b7bdc9 !important; }
+.template-midnight-executive .skill-tag { background: rgba(212,175,55,.14) !important; color: #d4af37 !important; }
+
+/* ---------- 26. Gradient Header ---------- */
+.template-gradient-header { background: #ffffff; }
+.template-gradient-header .cv-header {
+  background: linear-gradient(120deg, var(--accent, #6366f1) 0%, #8b5cf6 55%, #d946ef 100%);
+  margin: -40px -40px 28px;
+  padding: 34px 40px 30px;
+  border-radius: 0 0 28px 28px;
+}
+.template-gradient-header .cv-name { color: #ffffff !important; }
+.template-gradient-header .cv-profession { color: #ede9fe !important; }
+.template-gradient-header .cv-header p { color: rgba(255,255,255,.85) !important; }
+
+/* ---------- 27. Brutalist ---------- */
+.template-brutalist { background: #ffffff; border: 3px solid #111111; }
+.template-brutalist, .template-brutalist * { font-family: 'Roboto Mono', monospace !important; }
+.template-brutalist .cv-header { border-bottom: 3px solid #111111; }
+.template-brutalist .cv-name { text-transform: uppercase; }
+.template-brutalist .section-title {
+  border: 2px solid #111111 !important;
+  display: inline-flex;
+  padding: 3px 10px;
+  background: var(--accent, #ffe600);
+  color: #111111 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 12px !important;
+}
+.template-brutalist .skill-tag {
+  border: 2px solid #111111;
+  border-radius: 0 !important;
+  background: var(--accent, #ffe600) !important;
+  color: #111111 !important;
+}
+
+/* ---------- 28. Editorial Serif ---------- */
+.template-editorial-serif { background: #fffdf7; }
+.template-editorial-serif .cv-header { text-align: center; border-bottom: 1px solid #1c1917; padding-bottom: 18px; }
+.template-editorial-serif .cv-name { font-family: 'Playfair Display', serif !important; font-weight: 700; }
+.template-editorial-serif .contact-section .flex { justify-content: center; }
+.template-editorial-serif .section-title {
+  font-family: 'Playfair Display', serif !important;
+  font-style: italic;
+  font-weight: 500;
+  border-bottom: 1px solid #1c1917 !important;
+  color: #1c1917 !important;
+}
+.template-editorial-serif .summary-section p::first-letter {
+  font-family: 'Playfair Display', serif;
+  font-size: 3em;
+  float: left;
+  line-height: 0.85;
+  padding: 4px 8px 0 0;
+  color: var(--accent, #9a3412);
+}
+
+/* ---------- 29. Terminal (dark) ---------- */
+.template-terminal-dev { background: #0d1117; color: #7ee787; }
+.template-terminal-dev, .template-terminal-dev * { font-family: 'Roboto Mono', monospace !important; }
+.template-terminal-dev .cv-header { border-bottom: 1px dashed #30363d; }
+.template-terminal-dev .cv-name { color: #7ee787 !important; }
+.template-terminal-dev .cv-name::before { content: '$ '; color: #58a6ff; }
+.template-terminal-dev .cv-profession { color: #8b949e !important; }
+.template-terminal-dev .section-title {
+  color: #7ee787 !important;
+  border-color: #30363d !important;
+  letter-spacing: 0.05em;
+}
+.template-terminal-dev .section-title::before { content: '> '; color: #58a6ff; }
+.template-terminal-dev .contact-section span,
+.template-terminal-dev .cv-header p { color: #8b949e !important; }
+.template-terminal-dev .education-section h3,
+.template-terminal-dev .experience-section h3 { color: #c9d1d9 !important; }
+.template-terminal-dev .text-gray-600,
+.template-terminal-dev .text-gray-700 { color: #8b949e !important; }
+.template-terminal-dev .skill-tag {
+  background: #161b22 !important;
+  color: #7ee787 !important;
+  border: 1px solid #30363d;
+  border-radius: 6px !important;
+}
+
+/* ---------- 30. Academic ---------- */
+.template-academic { background: #ffffff; }
+.template-academic .cv-header { text-align: center; }
+.template-academic .contact-section .flex { justify-content: center; }
+.template-academic .cv-name { letter-spacing: 0.03em; }
+.template-academic .section-title {
+  text-align: center;
+  justify-content: center;
+  text-transform: uppercase;
+  font-size: 12px !important;
+  letter-spacing: 0.22em;
+  color: #111111 !important;
+  border-bottom: 1px solid #d1d5db !important;
+}
+
+/* ---------- 31. Soft UI ---------- */
+.template-soft-ui { background: #e8ecf3; }
+.template-soft-ui .cv-body section {
+  background: #e8ecf3;
+  border-radius: 18px;
+  padding: 16px 20px;
+  box-shadow: 7px 7px 14px #c9cfdb, -7px -7px 14px #ffffff;
+}
+.template-soft-ui .section-title {
+  border-bottom: none !important;
+  text-transform: uppercase;
+  font-size: 12px !important;
+  letter-spacing: 0.18em;
+}
+
+/* ---------- 32. Outline Frame ---------- */
+.template-outline-frame {
+  background: #ffffff;
+  box-shadow:
+    inset 0 0 0 6px #111111,
+    inset 0 0 0 5px #ffffff,
+    inset 0 0 0 4px #111111,
+    inset 0 0 0 3px #ffffff;
+}
+.template-outline-frame .cv-header { text-align: center; }
+.template-outline-frame .contact-section .flex { justify-content: center; }
+.template-outline-frame .cv-name { text-transform: uppercase; letter-spacing: 0.35em; }
+.template-outline-frame .section-title {
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-size: 11px !important;
+  border-bottom: none !important;
+  color: #111111 !important;
+}
+.template-outline-frame .section-title::before,
+.template-outline-frame .section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #111111;
+}
+
+/* ---------- 33. Warm Elegant ---------- */
+.template-warm-elegant { background: #f7f2ea; }
+.template-warm-elegant .cv-header { border-bottom: 1px solid #d8c9ac; padding-bottom: 16px; }
+.template-warm-elegant .cv-name { font-family: 'Playfair Display', serif !important; }
+.template-warm-elegant .cv-profession { text-transform: uppercase; letter-spacing: 0.12em; }
+.template-warm-elegant .contact-section { border-top: 1px solid #d8c9ac; padding-top: 10px; }
+.template-warm-elegant .section-title {
+  font-family: 'Playfair Display', serif !important;
+  color: var(--accent, #96733f) !important;
+  border-color: var(--accent, #96733f) !important;
+}
+
+/* ---------- 34. Photo Banner ---------- */
+.template-photo-banner { background: #f8fafc; }
+.template-photo-banner .cv-header {
+  background: var(--accent, #0ea5e9);
+  margin: -40px -40px 0;
+  padding: 40px 40px 90px;
+  text-align: center;
+}
+.template-photo-banner .cv-name { color: #ffffff !important; }
+.template-photo-banner .cv-profession { color: rgba(255,255,255,.85) !important; }
+.template-photo-banner .cv-header p { color: rgba(255,255,255,.75) !important; }
+.template-photo-banner .contact-section {
+  background: var(--accent, #0ea5e9);
+  margin: 0 -40px;
+  padding: 0 40px 90px;
+  text-align: center;
+}
+.template-photo-banner .contact-section .flex { justify-content: center; }
+.template-photo-banner .contact-section span { color: rgba(255,255,255,.9) !important; }
+.template-photo-banner .photo-section { display: flex; justify-content: center; margin-top: -70px; margin-bottom: 24px; }
+.template-photo-banner .photo-section img {
+  border: 6px solid #ffffff;
+  box-shadow: 0 10px 30px rgba(2,6,23,.3);
+  border-radius: 9999px;
+}
