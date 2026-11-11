@@ -73,10 +73,6 @@ export interface PhotoStyle {
   border: 'none' | 'thin' | 'thick' | 'colored' | 'shadow';
 }
 
-/** Manual drag offsets for free-move mode. */
-export interface FreePosition {
-  x: number;
-  y: number;
 }
 
 export interface CVData {
@@ -93,8 +89,7 @@ export interface CVData {
   /** Global order of section keys. */
   sectionOrder: string[];
 
-  /** Manual drag offsets for free-move mode, keyed by section key. */
-  freePositions?: Record<string, FreePosition>;
+
 }
 
 export interface CVSettings {
@@ -115,8 +110,6 @@ export interface CVSettings {
   contactPosition: string;
   layout: string;
 
-  /** Section movement mode: reorder in sequence or drag freely. */
-  moveMode: 'sequence' | 'free';
 }
 
 export const DEFAULT_CV_DATA: CVData = {
@@ -192,8 +185,6 @@ export const DEFAULT_CV_DATA: CVData = {
     'skills',
     'languages',
   ],
-
-  freePositions: {},
 };
 
 export const DEFAULT_SETTINGS: CVSettings = {
@@ -217,7 +208,6 @@ export const DEFAULT_SETTINGS: CVSettings = {
   namePosition: 'default',
   contactPosition: 'below-header',
   layout: 'default',
-  moveMode: 'sequence',
 };
 
 /* ------------------------------------------------------------------ */
