@@ -1,7 +1,9 @@
 import {
   Minimize2, Briefcase, Layout, Columns, Crown, Clock, Grid3x3,
   Moon, Palette, Table, AlignCenter, AlignLeft, AlignRight, FileText,
-  BookOpen, BarChart3, Type, Bold, Camera, ArrowDown, Minus, Feather
+  BookOpen, BarChart3, Type, Bold, Camera, ArrowDown, Minus, Feather,
+  Hash, PanelLeft, Gem, Sparkles, Box, Newspaper, SquareTerminal,
+  GraduationCap, Layers, Frame, Sun, IdCard,
 } from 'lucide-react';
 import { useCV } from '@/hooks/useCV';
 import { TEMPLATES } from '@/types/cv';
@@ -10,6 +12,8 @@ const iconMap: Record<string, React.ElementType> = {
   Minimize2, Briefcase, Layout, Columns, Crown, Clock, Grid3x3,
   Moon, Palette, Table, AlignCenter, AlignLeft, AlignRight, FileText,
   BookOpen, BarChart3, Type, Bold, Camera, ArrowDown, Minus, Feather,
+  Hash, PanelLeft, Gem, Sparkles, Box, Newspaper, SquareTerminal,
+  GraduationCap, Layers, Frame, Sun, IdCard,
 };
 
 export function TemplatesPanel() {
