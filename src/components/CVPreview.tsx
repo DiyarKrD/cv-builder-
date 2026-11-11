@@ -170,6 +170,7 @@ export function CVPreview() {
                 background: settings.cvBackgroundColor,
                 padding: `${settings.pagePadding}px`,
                 '--accent': settings.primaryColor,
+                '--accent2': settings.secondaryColor,
                 transform: `scale(${scale})`,
                 transformOrigin: 'top left',
               } as React.CSSProperties}
@@ -213,7 +214,10 @@ function PageHeader() {
     settings.template === 'dark-pro' ||
     settings.template === 'executive' ||
     settings.template === 'midnight-executive' ||
-    settings.template === 'terminal-dev';
+    settings.template === 'terminal-dev' ||
+    settings.template === 'neo-tokyo' ||
+    settings.template === 'bento-grid' ||
+    settings.template === 'glassmorphism';
 
   const nameColor = isDark ? '#ffffff' : settings.nameColor;
   const profColor = isDark ? '#cbd5e1' : settings.professionColor;
@@ -316,7 +320,10 @@ function SectionContent({ sectionKey, isCards }: { sectionKey: string; isCards: 
   const isDark =
     settings.template === 'dark-pro' ||
     settings.template === 'midnight-executive' ||
-    settings.template === 'terminal-dev';
+    settings.template === 'terminal-dev' ||
+    settings.template === 'neo-tokyo' ||
+    settings.template === 'bento-grid' ||
+    settings.template === 'glassmorphism';
 
   if (sectionKey === 'photo') return <PhotoSection />;
   if (sectionKey === 'summary') {
