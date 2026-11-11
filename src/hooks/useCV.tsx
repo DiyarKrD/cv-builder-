@@ -14,16 +14,6 @@ import type {
   LanguageLevel,
   PersonalInfo,
   PhotoStyle,
-} from '@/types/cv';
-import type {
-  CVData,
-  CVSettings,
-  CustomSection,
-  Education,
-  Experience,
-  LanguageLevel,
-  PersonalInfo,
-  PhotoStyle,
   FreePosition,
 } from '@/types/cv';
 
