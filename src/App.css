@@ -1,285 +1,122 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Poppins:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
-/* Font Classes */
-.font-inter { font-family: 'Inter', sans-serif; }
-.font-playfair { font-family: 'Playfair Display', serif; }
-.font-mono { font-family: 'Roboto Mono', monospace; }
-.font-poppins { font-family: 'Poppins', sans-serif; }
-.font-oswald { font-family: 'Oswald', sans-serif; }
-.font-raleway { font-family: 'Raleway', sans-serif; }
-.font-bebas { font-family: 'Bebas Neue', cursive; }
-.font-space { font-family: 'Space Grotesk', sans-serif; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in { animation: fadeIn 0.3s ease-out; }
-
-/* ============ CV Page ============ */
-.cv-page {
-  width: 794px;
-  height: 1123px;
-  background: white;
-  position: relative;
-  overflow: hidden;
-  -webkit-print-color-adjust: exact;
-  print-color-adjust: exact;
-}
-.page-outer { display: flex; flex-direction: column; align-items: center; }
-.page-shell { overflow: hidden; position: relative; margin: 0 auto 8px; }
-
-.page-break-indicator {
-  display: flex; align-items: center; justify-content: center;
-  gap: 16px; padding: 10px 0; color: #94a3b8; font-size: 12px; font-weight: 500;
-}
-.page-break-line { flex: 1; height: 1px; border-top: 2px dashed #cbd5e1; max-width: 200px; }
-
-/* ============ Inline editing ============ */
-.editable {
-  outline: none;
-  cursor: text;
-  border-radius: 2px;
-  min-width: 1ch;
-  display: inline-block;
-}
-.cv-page .editable:hover { box-shadow: 0 1px 0 0 rgba(59,130,246,.55); }
-.cv-page .editable:focus {
-  box-shadow: 0 0 0 2px rgba(59,130,246,.35);
-  background: rgba(59,130,246,.06);
-}
-.editable:empty::before {
-  content: attr(data-placeholder);
-  color: #9ca3af;
-  pointer-events: none;
-}
-
-/* ============ Draggable blocks ============ */
-.cv-block { position: relative; border-radius: 4px; }
-.cv-block:hover { outline: 1px dashed rgba(59,130,246,.45); outline-offset: 2px; }
-.cv-block.drop-before { box-shadow: 0 -3px 0 0 #3b82f6; }
-.block-handle {
-  position: absolute; top: 0; right: 0; z-index: 20;
-  width: 22px; height: 22px; border-radius: 6px;
-  background: #3b82f6; color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  cursor: grab; opacity: 0; transition: opacity .15s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,.25);
-}
-.cv-block:hover .block-handle { opacity: 1; }
-.block-handle:active { cursor: grabbing; }
-
-/* Row-level add / remove buttons */
-.row-remove {
-  position: absolute; top: 0; right: 26px; z-index: 15;
-  width: 18px; height: 18px; border-radius: 50%;
-  background: #ef4444; color: #fff; border: none;
-  display: none; align-items: center; justify-content: center;
-  cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.25);
-}
-.cv-block:hover .row-remove, .group\/edu:hover .row-remove, .group\/exp:hover .row-remove { display: flex; }
-.row-remove:hover { background: #b91c1c; }
-
-.row-add {
-  margin-top: 6px; display: none; align-items: center; gap: 4px;
-  padding: 3px 10px; font-size: 11px; font-weight: 500;
-  color: #3b82f6; background: #eff6ff; border: 1px dashed #93c5fd;
-  border-radius: 9999px; cursor: pointer;
-}
-.cv-block:hover .row-add, section:hover > .row-add { display: inline-flex; }
-.row-add:hover { background: #dbeafe; }
-
-.contact-remove {
-  display: none; border: none; background: none; padding: 0;
-  color: #ef4444; cursor: pointer; margin-left: 2px;
-}
-span:hover > .contact-remove { display: inline-flex; }
-
-.page-dropzone {
-  min-height: 26px; margin-top: 8px;
-  display: flex; align-items: center; justify-content: center;
-  border: 2px dashed transparent; border-radius: 8px;
-  transition: border-color .15s ease;
-}
-.page-dropzone:hover { border-color: #bfdbfe; }
-
-.add-section-btn {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 12px; font-size: 11px; font-weight: 500;
-  color: #6b7280; background: transparent; border: none;
-  border-radius: 9999px; cursor: pointer; opacity: 0;
-  transition: opacity .15s ease, background .15s ease;
-}
-.page-dropzone:hover .add-section-btn { opacity: 1; }
-.add-section-btn:hover { background: #eff6ff; color: #3b82f6; }
-
-/* Arrange chips (Content panel) */
-.arrange-chip {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 5px 10px; background: #fff;
-  border: 1px solid #bfdbfe; border-radius: 9999px;
-  font-size: 12px; font-weight: 500; color: #1e40af;
-  cursor: grab; user-select: none;
-}
-.arrange-chip:hover { box-shadow: 0 2px 6px rgba(37,99,235,.2); }
-
-/* Skills */
-.skill-tag {
-  position: relative;
-  display: inline-flex; align-items: center; gap: 2px;
-  padding: 4px 12px; border-radius: 9999px;
-  font-size: 0.875rem; font-weight: 500;
-}
-.tag-remove {
-  display: none; align-items: center; justify-content: center;
-  margin-left: 2px; padding: 0; border: none; background: none;
-  color: inherit; opacity: .7; cursor: pointer;
-}
-.skill-tag:hover .tag-remove, li:hover > .tag-remove { display: inline-flex; }
-.tag-remove:hover { opacity: 1; }
-.skill-input {
-  border: 1px dashed #cbd5e1; border-radius: 9999px;
-  padding: 4px 12px; font-size: 0.8rem; width: 130px;
-  outline: none;
-}
-.skill-input:focus { border-color: #3b82f6; }
-.exp-bullet { flex-shrink: 0; }
-
-/* ============ Templates ============ */
-.template-modern-minimalist { background: white; }
-.template-classic-pro { background: white; }
-.template-classic-pro .cv-header { border-top: 8px solid var(--primary-color, #1e40af); }
-.template-executive { background: linear-gradient(to bottom, var(--primary-color, #1e293b) 180px, white 180px); }
-.template-dark-pro { background: #0f172a; color: #f8fafc; }
-.template-dark-pro .text-gray-600, .template-dark-pro .text-gray-700,
-.template-dark-pro .text-gray-800, .template-dark-pro .text-gray-900 { color: #cbd5e1 !important; }
-.template-dark-pro .section-title { color: #f8fafc !important; }
-.template-dark-pro .border-b { border-color: #334155 !important; }
-.template-two-column-tech .cv-body { column-count: 2; column-gap: 32px; }
-.template-cards .section-card { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
-.template-colorful { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.template-colorful .cv-content { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-.template-centered { text-align: center; }
-.template-centered .cv-header, .template-centered .contact-section { text-align: center; justify-content: center; }
-.template-centered .contact-section .flex { justify-content: center; }
-.template-left-heavy { border-left: 4px solid var(--primary-color, #3b82f6); }
-.template-right-heavy { border-right: 4px solid var(--primary-color, #3b82f6); text-align: right; }
-.template-right-heavy .cv-header { flex-direction: row-reverse; text-align: right; }
-.template-compact { font-size: 0.85rem; line-height: 1.4; }
-.template-compact .section-title { font-size: 1rem; margin-bottom: 8px; }
-.template-compact p { margin-bottom: 4px; }
-.template-magazine { background: #fafafa; }
-.template-magazine .cv-header { border-bottom: 4px solid var(--primary-color, #111827); padding-bottom: 16px; }
-.template-minimal-text .cv-name { font-weight: 300; letter-spacing: 0.1em; }
-.template-minimal-text .section-title { font-weight: 400; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.75rem; }
-.template-bold-type { font-weight: 700; }
-.template-bold-type .cv-name { text-transform: uppercase; letter-spacing: -1px; }
-.template-bold-type .cv-profession { text-transform: uppercase; letter-spacing: 0.1em; }
-.template-bold-type .section-title { text-transform: uppercase; font-weight: 900; }
-.template-striped .cv-block:nth-child(odd) { background: #f8fafc; padding: 12px 16px; border-radius: 8px; }
-.template-elegant, .template-elegant * { font-family: 'Playfair Display', serif; }
-.template-elegant .cv-name, .template-elegant .section-title { font-weight: 400; letter-spacing: -0.5px; }
-
-/* Photo styles */
-.photo-square { border-radius: 0; }
-.photo-rounded { border-radius: 12px; }
-.photo-circle { border-radius: 50%; }
-.photo-hexagon { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
-.photo-border-none { border: none; }
-.photo-border-thin { border: 2px solid #e5e7eb; }
-.photo-border-thick { border: 4px solid var(--primary-color, #3b82f6); }
-.photo-border-colored { border: 4px solid var(--primary-color, #3b82f6); }
-.photo-border-shadow { box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
-
-/* Controls */
-input[type="color"] {
-  -webkit-appearance: none; border: none; width: 36px; height: 36px;
-  border-radius: 50%; overflow: hidden; cursor: pointer; padding: 0;
-}
-input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
-input[type="range"] {
-  -webkit-appearance: none; height: 6px; border-radius: 3px;
-  background: #e5e7eb; outline: none; width: 100%;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-  background: #3b82f6; cursor: pointer;
-}
-.template-card { transition: all 0.3s ease; cursor: pointer; }
-.template-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-.template-card.active { outline: 2px solid #3b82f6; outline-offset: 2px; }
-.drag-handle { cursor: grab; color: #94a3b8; }
-.drag-handle:active { cursor: grabbing; }
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-.lang-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
-
 /* ==================================================================
-   PRINT — WYSIWYG
-   - ONE render of the CV is used for screen AND print
-   - @page margin 0 removes browser headers/footers (date/url/page no.)
-   - each .page-shell is exactly one A4 page
+   NEW IN v2 — 6 additional templates + free-floating photo
    ================================================================== */
-@media print {
-  @page { size: A4; margin: 0; }
 
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-    width: 210mm;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+/* Free-floating photo: when the photo has a free position, its section
+   block must not be a positioned ancestor so the photo resolves
+   against the .cv-page instead. */
+.photo-free-block { position: static !important; outline: none !important; }
+.cv-page .photo-free { cursor: move; }
+.cv-page .photo-free:hover { outline: 2px dashed rgba(59,130,246,.65); outline-offset: 3px; }
 
-  /* Show only the CV */
-  body * { visibility: hidden !important; }
-  #cv-root, #cv-root * { visibility: visible !important; }
-  #cv-root {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    transform: none !important;
-    display: block !important;
-  }
+/* ---- 1. Glass Executive — dark glassmorphism ---- */
+.template-glass-exec {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0c4a6e 100%);
+  color: #e2e8f0;
+}
+.template-glass-exec .cv-header {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.template-glass-exec .cv-name { color: #ffffff !important; }
+.template-glass-exec .cv-profession { color: #93c5fd !important; }
+.template-glass-exec .section-title { color: #93c5fd !important; border-color: rgba(147,197,253,.4) !important; }
+.template-glass-exec .text-gray-600, .template-glass-exec .text-gray-700,
+.template-glass-exec .text-gray-800, .template-glass-exec .text-gray-900 { color: #cbd5e1 !important; }
+.template-glass-exec .skill-tag {
+  background: rgba(255,255,255,.08) !important;
+  color: #bfdbfe !important;
+  border: 1px solid rgba(255,255,255,.15);
+}
 
-  .no-print { display: none !important; }
+/* ---- 2. Gold Luxury — charcoal + gold accents ---- */
+.template-gold-luxury { background: #171717; color: #fafafa; }
+.template-gold-luxury .cv-header { border-bottom: 1px solid #b48a2f; padding-bottom: 18px; }
+.template-gold-luxury .cv-name { color: #f5d577 !important; }
+.template-gold-luxury .cv-profession {
+  color: #d4af37 !important;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  font-size: 13px !important;
+}
+.template-gold-luxury .section-title { color: #f5d577 !important; border-color: #b48a2f !important; }
+.template-gold-luxury .text-gray-600, .template-gold-luxury .text-gray-700,
+.template-gold-luxury .text-gray-800, .template-gold-luxury .text-gray-900 { color: #d4d4d4 !important; }
+.template-gold-luxury .skill-tag {
+  background: rgba(212,175,55,.12) !important;
+  color: #f5d577 !important;
+  border: 1px solid rgba(212,175,55,.35);
+}
 
-  .page-outer { display: block !important; }
-  .page-shell {
-    width: 210mm !important;
-    height: 297mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    page-break-after: always;
-    break-after: page;
-  }
-  .page-shell:last-child {
-    page-break-after: auto;
-    break-after: auto;
-  }
-  .cv-page {
-    width: 210mm !important;
-    height: 297mm !important;
-    transform: none !important;
-    transform-origin: top left !important;
-    box-shadow: none !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-  }
+/* ---- 3. Gradient Banner — bold colorful header band ---- */
+.template-gradient-banner { background: #ffffff; }
+.template-gradient-banner .cv-header {
+  background: linear-gradient(120deg, #6d28d9 0%, #2563eb 55%, #06b6d4 100%);
+  margin: calc(-1 * var(--page-padding, 40px)) calc(-1 * var(--page-padding, 40px)) 24px;
+  padding: var(--page-padding, 40px);
+  padding-bottom: 28px;
+  border-radius: 0 0 24px 24px;
+}
+.template-gradient-banner .cv-name { color: #ffffff !important; }
+.template-gradient-banner .cv-profession { color: rgba(255,255,255,.9) !important; }
+.template-gradient-banner .contact-section { margin-top: 4px; }
 
-  /* Strip editing affordances */
-  .cv-block { outline: none !important; box-shadow: none !important; }
-  .editable {
-    box-shadow: none !important;
-    background: transparent !important;
-    cursor: default;
-  }
-  .editable:empty::before { content: none !important; }
+/* ---- 4. Swiss Mono — monospace, uppercase, grid rules ---- */
+.template-swiss-mono { background: #ffffff; }
+.template-swiss-mono * { font-family: 'Roboto Mono', monospace; }
+.template-swiss-mono .cv-name { text-transform: uppercase; letter-spacing: -0.02em; }
+.template-swiss-mono .cv-body { border-top: 2px solid #111827; padding-top: 12px; }
+.template-swiss-mono .section-title {
+  text-transform: uppercase;
+  font-size: 11px !important;
+  letter-spacing: .2em;
+  color: #111827 !important;
+  border-bottom: 1px solid #111827 !important;
+  padding-bottom: 6px;
+}
+
+/* ---- 5. Neo Brutalist — hard borders, hard shadows ---- */
+.template-brutalist { background: #fdf9ee; }
+.template-brutalist .cv-header {
+  border: 3px solid #111111;
+  box-shadow: 8px 8px 0 #111111;
+  padding: 20px;
+  background: #ffe066;
+  margin-bottom: 28px;
+}
+.template-brutalist .cv-name { color: #111111 !important; }
+.template-brutalist .cv-profession { color: #111111 !important; }
+.template-brutalist .section-title {
+  background: #111111;
+  color: #ffe066 !important;
+  border: none !important;
+  padding: 6px 12px;
+  display: inline-block;
+  font-size: 13px !important;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.template-brutalist .skill-tag {
+  border: 2px solid #111111 !important;
+  box-shadow: 3px 3px 0 #111111;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+/* ---- 6. Pastel Soft — warm beige + serif headings ---- */
+.template-pastel-soft { background: #faf6f0; }
+.template-pastel-soft .cv-header {
+  background: #f3e8dc;
+  margin: calc(-1 * var(--page-padding, 40px)) calc(-1 * var(--page-padding, 40px)) 24px;
+  padding: var(--page-padding, 40px);
+  border-bottom: 1px solid #e2d4c0;
+}
+.template-pastel-soft .cv-name { font-family: 'Playfair Display', serif; }
+.template-pastel-soft .section-title {
+  font-family: 'Playfair Display', serif;
+  color: #8a6d4b !important;
+  border-color: #d9c3a5 !important;
 }
