@@ -72,8 +72,6 @@ interface CVContextValue {
 
   updateSetting: <K extends keyof CVSettings>(key: K, value: CVSettings[K]) => void;
   updatePhotoStyle: (patch: Partial<PhotoStyle>) => void;
-  updateFreePosition: (key: string, position: FreePosition) => void;
-  resetAllPositions: () => void;
 }
 
 const CVContext = createContext<CVContextValue | null>(null);
@@ -305,18 +303,7 @@ export function CVProvider({ children }: { children: ReactNode }) {
   const updatePhotoStyle = useCallback((patch: Partial<PhotoStyle>) => {
     setSettings(prev => ({ ...prev, photoStyle: { ...prev.photoStyle, ...patch } }));
   }, []);
-  const updateFreePosition = useCallback(
-  (key: string, position: FreePosition) => {
-    setCVDataState(prev => ({
-      ...prev,
-      freePositions: {
-        ...(prev.freePositions ?? {}),
-        [key]: position,
-      },
-    }));
-  },
-  [],
-);
+ 
 
 const resetAllPositions = useCallback(() => {
   setCVDataState(prev => ({
@@ -356,8 +343,6 @@ const resetAllPositions = useCallback(() => {
     moveSection,
     updateSetting,
     updatePhotoStyle,
-    updateFreePosition,
-    resetAllPositions,
   };
 
   return <CVContext.Provider value={value}>{children}</CVContext.Provider>;
