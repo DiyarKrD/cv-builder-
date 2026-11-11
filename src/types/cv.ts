@@ -73,8 +73,6 @@ export interface PhotoStyle {
   border: 'none' | 'thin' | 'thick' | 'colored' | 'shadow';
 }
 
-}
-
 export interface CVData {
   personal: PersonalInfo;
   contact: ContactInfo;

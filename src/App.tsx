@@ -31,7 +31,7 @@ function Builder() {
       </div>
 
       {/* Import Dialog */}
-      <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} />
+      <ImportDialog open={importOpen} onOpenChange={setImportOpen} />
     </div>
   );
 }

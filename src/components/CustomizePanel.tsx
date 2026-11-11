@@ -1,6 +1,6 @@
 import { useCV } from '@/hooks/useCV';
 import { FONT_OPTIONS } from '@/types/cv';
-import { Type, Image, Layout, Palette, Move3d } from 'lucide-react';
+import { Type, Image, Layout, Palette } from 'lucide-react';
 
 export function CustomizePanel() {
 const { settings, updateSetting, updatePhotoStyle } = useCV();

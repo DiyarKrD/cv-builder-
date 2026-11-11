@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import {
@@ -14,7 +15,6 @@ import type {
   LanguageLevel,
   PersonalInfo,
   PhotoStyle,
-  FreePosition,
 } from '@/types/cv';
 
 const STORAGE_KEY_DATA = 'cv-master-builder:data';
@@ -303,14 +303,6 @@ export function CVProvider({ children }: { children: ReactNode }) {
   const updatePhotoStyle = useCallback((patch: Partial<PhotoStyle>) => {
     setSettings(prev => ({ ...prev, photoStyle: { ...prev.photoStyle, ...patch } }));
   }, []);
- 
-
-const resetAllPositions = useCallback(() => {
-  setCVDataState(prev => ({
-    ...prev,
-    freePositions: {},
-  }));
-}, []);
 
   const value: CVContextValue = {
     cvData,

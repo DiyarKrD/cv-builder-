@@ -6,7 +6,7 @@
  */
 const FLAG_CDN = 'https://flagcdn.com/w40';
 
-export function isCountryCode(flag: string): boolean {
+function isCountryCode(flag: string): boolean {
   return /^[a-z]{2}$/i.test(flag.trim());
 }
 

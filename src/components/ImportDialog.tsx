@@ -164,7 +164,7 @@ export function ImportDialog({
     return {
       personal: {
         ...(cvData.personal ?? {}),
-        name,
+        fullName: name || cvData.personal.fullName,
       },
 
       contact: {
@@ -174,23 +174,33 @@ export function ImportDialog({
         location,
       },
 
-      skills:
-        skills.length > 0
-          ? skills.map((skill) => ({
-              name: skill,
-            })) as CVData['skills']
-          : undefined,
+      skills: skills.length > 0 ? skills : undefined,
 
       professionalSummary: summary || undefined,
 
       education:
         education.length > 0
-          ? [{ description: education } as CVData['education'][number]]
+          ? [
+              {
+                id: `${Date.now()}-import-edu`,
+                degree: education.split('\n')[0] ?? '',
+                university: education.split('\n').slice(1).join('\n'),
+                year: '',
+              },
+            ]
           : undefined,
 
       experience:
         experience.length > 0
-          ? [{ description: experience } as CVData['experience'][number]]
+          ? [
+              {
+                id: `${Date.now()}-import-exp`,
+                title: '',
+                company: '',
+                period: '',
+                description: experience,
+              },
+            ]
           : undefined,
     };
   };
