@@ -1,9 +1,18 @@
 import { useCV } from '@/hooks/useCV';
 import { FONT_OPTIONS } from '@/types/cv';
-import { Type, Image, Layout, Palette } from 'lucide-react';
+import { Type, Image, Layout, Palette, Move3d } from 'lucide-react';
 
 export function CustomizePanel() {
-  const { settings, updateSetting, updatePhotoStyle } = useCV();
+  const {
+  settings,
+  updateSetting,
+  updatePhotoStyle,
+  resetAllPositions,
+  cvData,
+} = useCV();
+
+const movedCount = Object.values(cvData.freePositions ?? {})
+  .filter(p => p.x !== 0 || p.y !== 0).length;
 
   const fontClassMap: Record<string, string> = {
     Inter: 'font-inter',
@@ -134,7 +143,45 @@ export function CustomizePanel() {
             </div>
           </div>
         </div>
-
+                {/* Moving — sequence reorder vs. free cursor dragging */}
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Move3d className="w-4 h-4" /> Moving
+          </h3>
+        
+          <div className="flex flex-wrap items-center gap-2">
+            {(['sequence', 'free'] as const).map(mode => (
+              <button
+                key={mode}
+                onClick={() => updateSetting('moveMode', mode)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  settings.moveMode === mode
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {mode === 'sequence'
+                  ? 'Sequence Move (reorder)'
+                  : 'Free Move (cursor drag)'}
+              </button>
+            ))}
+        
+            <button
+              onClick={resetAllPositions}
+              disabled={movedCount === 0}
+              className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition disabled:opacity-40"
+            >
+              Reset all positions
+              {movedCount > 0 ? ` (${movedCount})` : ''}
+            </button>
+          </div>
+        
+          <p className="text-xs text-gray-400 mt-2">
+            Sequence Move: drag sections by their grip handle to reorder them.
+            Free Move: drag elements around the CV page.
+            Reset all positions restores their original locations.
+          </p>
+        </div>
         {/* Layout */}
         <div>
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
